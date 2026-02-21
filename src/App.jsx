@@ -27,6 +27,7 @@ import {
   DownloadTwoTone,
   GitHub,
   InfoOutlined,
+  CloudUpload,
 } from '@mui/icons-material'
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { FastAverageColor } from 'fast-average-color'
@@ -34,6 +35,7 @@ import characters from './characters.json'
 import Canvas from './components/Canvas'
 import Picker from './components/Picker'
 import Info from './components/Info'
+import UploadDialog from './components/UploadDialog'
 import ThemeWrapper from './components/ThemeWrapper'
 
 const fac = new FastAverageColor()
@@ -94,6 +96,7 @@ function desaturateColor(hex) {
 
 function App() {
   const [infoOpen, setInfoOpen] = useState(false)
+  const [uploadOpen, setUploadOpen] = useState(false)
   const [copyPopupOpen, setCopyPopupOpen] = useState(false)
   const [downloadPopupOpen, setDownloadPopupOpen] = useState(false)
   const [dominantColor, setDominantColor] = useState('#cf93d9')
@@ -732,7 +735,7 @@ function App() {
                 导出选项
               </Typography>
               <Grid container spacing={1}>
-                <Grid item xs={6} sm={4} md={2.4}>
+                <Grid item xs={6} sm={4} md={2}>
                   <Button
                     variant="contained"
                     color="secondary"
@@ -743,7 +746,7 @@ function App() {
                     复制 PNG
                   </Button>
                 </Grid>
-                <Grid item xs={6} sm={4} md={2.4}>
+                <Grid item xs={6} sm={4} md={2}>
                   <Button
                     variant="contained"
                     color="secondary"
@@ -754,7 +757,7 @@ function App() {
                     复制 JPG
                   </Button>
                 </Grid>
-                <Grid item xs={6} sm={4} md={2.4}>
+                <Grid item xs={6} sm={4} md={2}>
                   <Button
                     variant="contained"
                     color="secondary"
@@ -765,7 +768,7 @@ function App() {
                     保存 PNG
                   </Button>
                 </Grid>
-                <Grid item xs={6} sm={4} md={2.4}>
+                <Grid item xs={6} sm={4} md={2}>
                   <Button
                     variant="contained"
                     color="secondary"
@@ -776,7 +779,7 @@ function App() {
                     保存 JPG
                   </Button>
                 </Grid>
-                <Grid item xs={6} sm={4} md={2.4}>
+                <Grid item xs={6} sm={4} md={2}>
                   <Button
                     variant="contained"
                     color="secondary"
@@ -787,6 +790,17 @@ function App() {
                     保存 WEBP
                   </Button>
                 </Grid>
+                <Grid item xs={6} sm={4} md={2}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    startIcon={<CloudUpload />}
+                    onClick={() => setUploadOpen(true)}
+                    fullWidth
+                  >
+                    上传分享
+                  </Button>
+                </Grid>
               </Grid>
             </Paper>
           </Grid>
@@ -794,6 +808,12 @@ function App() {
       </Box>
 
       <Info open={infoOpen} handleClose={() => setInfoOpen(false)} />
+      <UploadDialog
+        open={uploadOpen}
+        onClose={() => setUploadOpen(false)}
+        canvas={canvasRef.current}
+        altText={text}
+      />
       <Snackbar
         open={copyPopupOpen}
         autoHideDuration={3000}
