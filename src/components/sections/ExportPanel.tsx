@@ -8,6 +8,15 @@ import {
   CloudUpload,
 } from '@mui/icons-material'
 
+interface ExportPanelProps {
+  onCopy: () => void
+  onCopyWithBg: () => void
+  onDownload: () => void
+  onDownloadJpg: () => void
+  onDownloadWebp: () => void
+  onUpload: () => void
+}
+
 /**
  * Panel that groups all export buttons
  */
@@ -18,7 +27,7 @@ export default function ExportPanel({
   onDownloadJpg,
   onDownloadWebp,
   onUpload,
-}) {
+}: ExportPanelProps) {
   return (
     <Paper elevation={3} sx={{ p: 2 }}>
       <Typography variant="h6" gutterBottom>
