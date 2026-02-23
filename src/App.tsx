@@ -38,6 +38,7 @@ import ExportPanel from './components/sections/ExportPanel'
 const Info = lazy(() => import('./components/Info'))
 const UploadDialog = lazy(() => import('./components/UploadDialog'))
 const HistoryPanel = lazy(() => import('./components/sections/HistoryPanel'))
+const PWAUpdatePrompt = lazy(() => import('./components/PWAUpdatePrompt'))
 
 import { useCharacter } from './hooks/useCharacter'
 import { useColorScheme } from './hooks/useColorScheme'
@@ -611,6 +612,11 @@ function App() {
         message="下载成功！"
         onClose={() => uiState.setDownloadPopupOpen(false)}
       />
+
+      {/* PWA Update Prompt */}
+      <Suspense fallback={null}>
+        <PWAUpdatePrompt />
+      </Suspense>
     </ThemeWrapper>
   )
 }

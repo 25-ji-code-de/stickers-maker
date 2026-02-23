@@ -186,7 +186,7 @@ export default function Picker({ setCharacter, color }: PickerProps) {
                 width: '8px',
               },
               '&::-webkit-scrollbar-thumb': {
-                bgcolor: 'rgba(207, 147, 217, 0.5)',
+                bgcolor: 'rgba(228, 194, 200, 0.5)',
                 borderRadius: '4px',
               },
             }}

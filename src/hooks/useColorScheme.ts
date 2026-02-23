@@ -14,8 +14,8 @@ const typedCharacters = characters as Character[]
  * Hook for managing theme and text colors with automatic extraction from images
  */
 export function useColorScheme(character: number): ColorScheme {
-  const [dominantColor, setDominantColor] = useState<string>('#cf93d9')
-  const [backgroundColor, setBackgroundColor] = useState<string>('#212121')
+  const [dominantColor, setDominantColor] = useState<string>('rgb(228, 194, 200)')
+  const [backgroundColor, setBackgroundColor] = useState<string>('rgb(67, 60, 61)')
   const [textColor, setTextColor] = useState<string>(typedCharacters[character].color)
 
   const updateColorsFromImage = useCallback((imgObj: HTMLImageElement): void => {

@@ -21,7 +21,7 @@ export default function FontLoadingOverlay({ progress }: FontLoadingOverlayProps
           left: 0,
           right: 0,
           height: 3,
-          bgcolor: 'rgba(255, 255, 255, 0.1)',
+          bgcolor: 'rgba(228, 194, 200, 0.2)',
           overflow: 'hidden',
           zIndex: 10,
         }}
@@ -30,9 +30,9 @@ export default function FontLoadingOverlay({ progress }: FontLoadingOverlayProps
           sx={{
             height: '100%',
             width: `${progress}%`,
-            background: 'linear-gradient(90deg, #cf93d9, #b974d2)',
+            background: 'linear-gradient(90deg, rgb(228, 194, 200), rgba(228, 194, 200, 0.8))',
             transition: 'width 0.3s ease-out',
-            boxShadow: '0 0 10px rgba(207, 147, 217, 0.5)',
+            boxShadow: '0 0 10px rgba(228, 194, 200, 0.5)',
           }}
         />
       </Box>
@@ -47,14 +47,14 @@ export default function FontLoadingOverlay({ progress }: FontLoadingOverlayProps
             display: 'flex',
             alignItems: 'center',
             gap: 0.8,
-            bgcolor: 'rgba(207, 147, 217, 0.95)',
-            color: '#000',
+            bgcolor: 'rgb(67, 60, 61)',
+            color: 'rgb(228, 194, 200)',
             px: 1.5,
             py: 0.7,
             borderRadius: 2,
             fontSize: '0.75rem',
             fontWeight: 600,
-            boxShadow: '0 2px 8px rgba(207, 147, 217, 0.4)',
+            boxShadow: '0 2px 8px rgba(67, 60, 61, 0.6)',
             zIndex: 10,
             animation: 'fadeIn 0.3s ease-out',
             '@keyframes fadeIn': {
@@ -68,8 +68,8 @@ export default function FontLoadingOverlay({ progress }: FontLoadingOverlayProps
             sx={{
               width: 12,
               height: 12,
-              border: '2px solid rgba(0, 0, 0, 0.3)',
-              borderTopColor: '#000',
+              border: '2px solid rgba(228, 194, 200, 0.3)',
+              borderTopColor: 'rgb(228, 194, 200)',
               borderRadius: '50%',
               animation: 'spin 0.8s linear infinite',
               '@keyframes spin': {

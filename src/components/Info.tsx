@@ -43,8 +43,8 @@ export default function Info({ open, handleClose }: InfoProps) {
             target="_blank"
           >
             <ListItemAvatar>
-              <Avatar sx={{ bgcolor: '#cf93d9' }}>
-                <GitHub />
+              <Avatar sx={{ bgcolor: 'rgb(228, 194, 200)' }}>
+                <GitHub sx={{ color: 'rgb(67, 60, 61)' }} />
               </Avatar>
             </ListItemAvatar>
             <ListItemText
@@ -57,7 +57,7 @@ export default function Info({ open, handleClose }: InfoProps) {
               <Avatar
                 alt="bili_47177171806"
                 src="/avatar.jpg"
-                sx={{ bgcolor: '#cf93d9' }}
+                sx={{ bgcolor: 'rgb(228, 194, 200)' }}
               />
             </ListItemAvatar>
             <ListItemText
