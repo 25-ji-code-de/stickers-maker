@@ -24,6 +24,8 @@ import {
   KeyboardArrowUp,
   KeyboardArrowDown,
   History,
+  Undo,
+  Redo,
 } from '@mui/icons-material'
 import { useCallback, useEffect, useRef, lazy, Suspense } from 'react'
 import characters from './characters.json'
@@ -50,6 +52,7 @@ import { useExport } from './hooks/useExport'
 import { useUIState } from './hooks/useUIState'
 import { useHistory } from './hooks/useHistory'
 import { useFontLoader } from './hooks/useFontLoader'
+import { useUndoRedo } from './hooks/useUndoRedo'
 import { StickerConfig } from './types'
 import FontLoadingOverlay from './components/FontLoadingOverlay'
 
@@ -87,6 +90,10 @@ function App() {
   )
 
   const history = useHistory()
+
+  // Undo/Redo hook
+  const undoRedo = useUndoRedo()
+  const isRestoringState = useRef<boolean>(false)
 
   // Monitor font loading status
   const { fontsReady, progress: fontProgress } = useFontLoader()
@@ -247,6 +254,95 @@ function App() {
     }
   }, [history, characterHook, textSettings, position, stroke, colorScheme])
 
+  // Apply configuration (used by both history and undo/redo)
+  const applyConfig = useCallback((config: StickerConfig) => {
+    isRestoringState.current = true
+
+    characterHook.setCharacter(config.character)
+    textSettings.setText(config.text)
+    textSettings.setFontSize(config.fontSize)
+    textSettings.setFontKey(config.fontKey)
+    textSettings.setRotate(config.rotate)
+    textSettings.setSpaceSize(config.spaceSize)
+    textSettings.setLetterSpacing(config.letterSpacing)
+    textSettings.setCurve(config.curve)
+    textSettings.setVertical(config.vertical)
+    textSettings.setTextBehind(config.textBehind)
+    position.setPosition(config.position)
+    stroke.setStrokeWidth(config.strokeWidth)
+    stroke.setStrokeColor(config.strokeColor)
+    colorScheme.setTextColor(config.textColor)
+
+    setTimeout(() => {
+      isRestoringState.current = false
+    }, 100)
+  }, [characterHook, textSettings, position, stroke, colorScheme])
+
+  // Push current state to undo/redo stack when any setting changes (with debounce)
+  useEffect(() => {
+    if (isRestoringState.current) return
+
+    // Debounce: wait 500ms after the last change before recording
+    const timeoutId = setTimeout(() => {
+      const config = getCurrentConfig()
+      undoRedo.pushState(config)
+    }, 500)
+
+    return () => clearTimeout(timeoutId)
+  }, [
+    characterHook.character,
+    textSettings.text,
+    textSettings.fontSize,
+    textSettings.fontKey,
+    textSettings.rotate,
+    textSettings.spaceSize,
+    textSettings.letterSpacing,
+    textSettings.curve,
+    textSettings.vertical,
+    textSettings.textBehind,
+    position.position,
+    stroke.strokeWidth,
+    stroke.strokeColor,
+    colorScheme.textColor,
+    getCurrentConfig,
+    undoRedo,
+  ])
+
+  // Handle undo
+  const handleUndo = useCallback(() => {
+    const previousState = undoRedo.undo()
+    if (previousState) {
+      applyConfig(previousState)
+    }
+  }, [undoRedo, applyConfig])
+
+  // Handle redo
+  const handleRedo = useCallback(() => {
+    const nextState = undoRedo.redo()
+    if (nextState) {
+      applyConfig(nextState)
+    }
+  }, [undoRedo, applyConfig])
+
+  // Keyboard shortcuts for undo/redo
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ctrl+Z or Cmd+Z for undo
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault()
+        handleUndo()
+      }
+      // Ctrl+Y or Cmd+Y or Ctrl+Shift+Z for redo
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+        e.preventDefault()
+        handleRedo()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [handleUndo, handleRedo])
+
   return (
     <ThemeWrapper dominantColor={colorScheme.dominantColor} backgroundColor={colorScheme.backgroundColor}>
       <Box sx={{ minHeight: '100vh', width: '100%', px: { xs: 1.5, sm: 3 }, py: 3 }}>
@@ -266,6 +362,28 @@ function App() {
               >Project Sekai 贴纸生成器</Typography>
               {/* Desktop buttons */}
               <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1 }}>
+                <Tooltip title="撤销 (Ctrl+Z)">
+                  <span>
+                    <IconButton
+                      color="secondary"
+                      onClick={handleUndo}
+                      disabled={!undoRedo.canUndo}
+                    >
+                      <Undo />
+                    </IconButton>
+                  </span>
+                </Tooltip>
+                <Tooltip title="重做 (Ctrl+Y)">
+                  <span>
+                    <IconButton
+                      color="secondary"
+                      onClick={handleRedo}
+                      disabled={!undoRedo.canRedo}
+                    >
+                      <Redo />
+                    </IconButton>
+                  </span>
+                </Tooltip>
                 <Tooltip title="历史记录">
                   <IconButton color="secondary" onClick={() => uiState.setHistoryOpen(true)}>
                     <History />
@@ -522,11 +640,36 @@ function App() {
           sx={{
             display: { xs: 'flex', md: 'none' },
             justifyContent: 'center',
+            flexWrap: 'wrap',
             gap: 1.5,
             mt: 3,
             pb: 2,
           }}
         >
+          <Tooltip title="撤销">
+            <span>
+              <IconButton
+                color="secondary"
+                onClick={handleUndo}
+                disabled={!undoRedo.canUndo}
+                sx={{ border: '1px solid rgba(228, 194, 200, 0.5)' }}
+              >
+                <Undo />
+              </IconButton>
+            </span>
+          </Tooltip>
+          <Tooltip title="重做">
+            <span>
+              <IconButton
+                color="secondary"
+                onClick={handleRedo}
+                disabled={!undoRedo.canRedo}
+                sx={{ border: '1px solid rgba(228, 194, 200, 0.5)' }}
+              >
+                <Redo />
+              </IconButton>
+            </span>
+          </Tooltip>
           <Tooltip title="历史记录">
             <Button
               variant="outlined"
