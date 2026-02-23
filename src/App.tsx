@@ -40,8 +40,8 @@ import { useExport } from './hooks/useExport'
 import { useUIState } from './hooks/useUIState'
 
 function App() {
-  const canvasRef = useRef(null)
-  const fileInputRef = useRef(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Initialize hooks
   const uiState = useUIState()
@@ -50,7 +50,7 @@ function App() {
   const colorScheme = useColorScheme(49) // Initial character
 
   // Use useCallback to stabilize the onImageLoad callback
-  const handleImageLoad = useCallback((img) => {
+  const handleImageLoad = useCallback((img: HTMLImageElement) => {
     colorScheme.updateColorsFromImage(img)
   }, [colorScheme.updateColorsFromImage])
 
@@ -86,7 +86,7 @@ function App() {
 
   // Canvas drawing callback
   const draw = useCallback(
-    (ctx) => {
+    (ctx: CanvasRenderingContext2D) => {
       canvasDrawing.draw(
         ctx,
         characterHook.imgObj,
@@ -134,7 +134,7 @@ function App() {
     colorScheme.setTextColor(characters[characterHook.character].color)
   }
 
-  const handleCharacterSelect = (index) => {
+  const handleCharacterSelect = (index: number) => {
     characterHook.setCharacter(index)
   }
 
@@ -284,7 +284,7 @@ function App() {
                 </Typography>
                 <Slider
                   value={position.position.x}
-                  onChange={(_, v) => position.setPosition({ ...position.position, x: v })}
+                  onChange={(_, v) => position.setPosition({ ...position.position, x: Array.isArray(v) ? v[0] : v })}
                   min={0}
                   max={296}
                   color="secondary"

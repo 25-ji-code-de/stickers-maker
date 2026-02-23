@@ -16,6 +16,11 @@ import { useState, useMemo, useCallback } from 'react'
 import characters from '../characters.json'
 import { PersonSearch } from '@mui/icons-material'
 
+interface PickerProps {
+  setCharacter: (index: number) => void
+  color: string
+}
+
 const pickerItemSx = {
   cursor: 'pointer',
   '&:hover': {
@@ -26,7 +31,7 @@ const pickerItemSx = {
   },
 }
 
-export default function Picker({ setCharacter, color }) {
+export default function Picker({ setCharacter, color }: PickerProps) {
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
   const isSmallScreen = useMediaQuery('(max-width:600px)')
@@ -39,18 +44,18 @@ export default function Picker({ setCharacter, color }) {
     setOpen(false)
   }, [])
 
-  const handleCharacterSelect = useCallback((index) => {
+  const handleCharacterSelect = useCallback((index: number) => {
     handleClose()
     setCharacter(index)
   }, [handleClose, setCharacter])
 
-  const handleSearchChange = useCallback((e) => {
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value)
   }, [])
 
   const renderedItems = useMemo(() => {
     const s = search.toLowerCase()
-    return characters.reduce((acc, c, index) => {
+    return characters.reduce((acc: JSX.Element[], c, index) => {
       if (
         s === '' ||
         s === c.id ||

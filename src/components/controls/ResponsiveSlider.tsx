@@ -3,9 +3,16 @@
 
 import { Box, Typography, Slider } from '@mui/material'
 
-/**
- * Reusable slider with mobile/desktop responsive layouts
- */
+interface ResponsiveSliderProps {
+  label: string
+  value: number
+  onChange: (value: number) => void
+  min: number
+  max: number
+  step?: number
+  showValue?: boolean
+}
+
 export default function ResponsiveSlider({
   label,
   value,
@@ -14,22 +21,19 @@ export default function ResponsiveSlider({
   max,
   step = 1,
   showValue = true,
-}) {
+}: ResponsiveSliderProps) {
   return (
     <Box sx={{ mt: { xs: 1, md: 2 } }}>
-      {/* Desktop: label on top with value */}
       <Typography variant="body2" gutterBottom sx={{ display: { xs: 'none', md: 'block' } }}>
         {label}{showValue && `: ${value}`}
       </Typography>
-
-      {/* Mobile: label and slider on same line */}
       <Box sx={{ display: { xs: 'flex', md: 'none' }, alignItems: 'center', gap: 1 }}>
         <Typography variant="body2" sx={{ fontSize: '0.8rem', minWidth: '64px' }}>
           {label}
         </Typography>
         <Slider
           value={value}
-          onChange={(_, v) => onChange(v)}
+          onChange={(_, v) => onChange(Array.isArray(v) ? v[0] : v)}
           min={min}
           max={max}
           step={step}
@@ -37,12 +41,10 @@ export default function ResponsiveSlider({
           valueLabelDisplay="auto"
         />
       </Box>
-
-      {/* Desktop: slider on separate line */}
       <Box sx={{ display: { xs: 'none', md: 'block' } }}>
         <Slider
           value={value}
-          onChange={(_, v) => onChange(v)}
+          onChange={(_, v) => onChange(Array.isArray(v) ? v[0] : v)}
           min={min}
           max={max}
           step={step}

@@ -8,6 +8,7 @@
 ![GitHub issues](https://img.shields.io/github/issues/25-ji-code-de/stickers-maker?style=flat-square&color=884499)
 ![GitHub last commit](https://img.shields.io/github/last-commit/25-ji-code-de/stickers-maker?style=flat-square&color=884499)
 ![GitHub repo size](https://img.shields.io/github/repo-size/25-ji-code-de/stickers-maker?style=flat-square&color=884499)
+[![CodeFactor](https://img.shields.io/codefactor/grade/github/25-ji-code-de/stickers-maker?style=flat-square&color=884499)](https://www.codefactor.io/repository/github/25-ji-code-de/stickers-maker)
 
 </div>
 

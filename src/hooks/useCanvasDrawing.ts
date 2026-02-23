@@ -1,13 +1,32 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright (C) 2026 The 25-ji-code-de Team
 
-import { useCallback, useMemo } from 'react'
+import { useCallback } from 'react'
+import { Position, FontKey } from '../types'
 
-const FONT_STACKS = {
+const FONT_STACKS: Record<FontKey, string> = {
   yuruka: 'YurukaStd, SSFangTangTi, sans-serif',
   fangtang: 'SSFangTangTi, sans-serif',
   system:
     "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+}
+
+interface TextSettings {
+  fontSize: number
+  fontKey: FontKey
+  spaceSize: number
+  letterSpacing: number
+  curve: boolean
+  vertical: boolean
+}
+
+interface Colors {
+  textColor: string
+}
+
+interface Stroke {
+  strokeWidth: number
+  strokeColor: string
 }
 
 /**
@@ -15,7 +34,16 @@ const FONT_STACKS = {
  */
 export function useCanvasDrawing() {
   const drawText = useCallback(
-    (ctx, text, position, rotate, textSettings, colors, stroke, angle) => {
+    (
+      ctx: CanvasRenderingContext2D,
+      text: string,
+      position: Position,
+      rotate: number,
+      textSettings: TextSettings,
+      colors: Colors,
+      stroke: Stroke,
+      angle: number
+    ): void => {
       const { fontSize, fontKey, spaceSize, letterSpacing, curve, vertical } = textSettings
       const { textColor } = colors
       const { strokeWidth, strokeColor } = stroke
@@ -56,7 +84,6 @@ export function useCanvasDrawing() {
           xOffset += lineStep
         }
       } else {
-        // Horizontal text with character spacing support
         if (letterSpacing === 0) {
           for (let i = 0, k = 0; i < lines.length; i++) {
             ctx.strokeText(lines[i], 0, k)
@@ -86,7 +113,18 @@ export function useCanvasDrawing() {
   )
 
   const draw = useCallback(
-    (ctx, imgObj, loaded, text, position, rotate, textSettings, colors, stroke, textBehind) => {
+    (
+      ctx: CanvasRenderingContext2D,
+      imgObj: HTMLImageElement | null,
+      loaded: boolean,
+      text: string,
+      position: Position,
+      rotate: number,
+      textSettings: TextSettings,
+      colors: Colors,
+      stroke: Stroke,
+      textBehind: boolean
+    ): void => {
       const w = 296
       const h = 256
       if (ctx.canvas.width !== w) ctx.canvas.width = w

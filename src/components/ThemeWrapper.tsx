@@ -5,7 +5,13 @@ import { ThemeProvider, createTheme } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 import { useMemo } from 'react'
 
-export default function ThemeWrapper({ dominantColor, backgroundColor, children }) {
+interface ThemeWrapperProps {
+  dominantColor: string
+  backgroundColor: string
+  children: React.ReactNode
+}
+
+export default function ThemeWrapper({ dominantColor, backgroundColor, children }: ThemeWrapperProps) {
   const theme = useMemo(
     () =>
       createTheme({

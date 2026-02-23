@@ -18,7 +18,14 @@ import {
 import { Close, ContentCopy, CloudUpload } from '@mui/icons-material'
 import { useState } from 'react'
 
-function UploadDialog({ open, onClose, canvas, altText = '' }) {
+interface UploadDialogProps {
+  open: boolean
+  onClose: () => void
+  canvas: HTMLCanvasElement | null
+  altText?: string
+}
+
+function UploadDialog({ open, onClose, canvas, altText = '' }: UploadDialogProps) {
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [uploadedUrl, setUploadedUrl] = useState('')
@@ -35,7 +42,7 @@ function UploadDialog({ open, onClose, canvas, altText = '' }) {
 
     try {
       // 将 canvas 转换为 Blob
-      const blob = await new Promise((resolve) => {
+      const blob = await new Promise<Blob | null>((resolve) => {
         canvas.toBlob(resolve, 'image/png')
       })
 
@@ -88,9 +95,10 @@ function UploadDialog({ open, onClose, canvas, altText = '' }) {
       xhr.open('PUT', 'https://storage.nightcord.de5.net')
       xhr.setRequestHeader('X-Filename', encodeURIComponent(filename))
       xhr.setRequestHeader('Content-Type', 'image/png')
-      xhr.send(blob)
+      xhr.send(blob as XMLHttpRequestBodyInit)
     } catch (err) {
-      setError(err.message || '上传失败')
+      const errorMessage = err instanceof Error ? err.message : '上传失败'
+      setError(errorMessage)
       setUploading(false)
     }
   }
@@ -116,7 +124,7 @@ function UploadDialog({ open, onClose, canvas, altText = '' }) {
     }
   }
 
-  const copyToClipboard = async (text, format) => {
+  const copyToClipboard = async (text: string, format: string) => {
     try {
       await navigator.clipboard.writeText(text)
       setCopiedFormat(format)

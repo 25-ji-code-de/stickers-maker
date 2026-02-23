@@ -15,6 +15,18 @@ import {
   KeyboardArrowUp,
   KeyboardArrowDown,
 } from '@mui/icons-material'
+import { Position } from '../../types'
+
+interface PositionControlProps {
+  position: Position
+  onPositionChange: (position: Position) => void
+  moveX: (delta: number) => void
+  moveY: (delta: number) => void
+  maxX?: number
+  maxY?: number
+  showMobile?: boolean
+  showDesktop?: boolean
+}
 
 /**
  * Complete position control with sliders and buttons
@@ -30,7 +42,7 @@ export default function PositionControl({
   maxY = 256,
   showMobile = true,
   showDesktop = true,
-}) {
+}: PositionControlProps) {
   return (
     <>
       {/* Mobile: Horizontal slider (below canvas) */}
@@ -48,7 +60,7 @@ export default function PositionControl({
           <Box flex={1} display="flex" alignItems="center">
             <Slider
               value={position.x}
-              onChange={(_, v) => onPositionChange({ ...position, x: v })}
+              onChange={(_, v) => onPositionChange({ ...position, x: Array.isArray(v) ? v[0] : v })}
               min={0}
               max={maxX}
               color="secondary"
@@ -76,7 +88,7 @@ export default function PositionControl({
             <Slider
               orientation="vertical"
               value={maxY - position.y}
-              onChange={(_, v) => onPositionChange({ ...position, y: maxY - v })}
+              onChange={(_, v) => onPositionChange({ ...position, y: maxY - (Array.isArray(v) ? v[0] : v) })}
               min={0}
               max={maxY}
               color="secondary"
@@ -116,7 +128,7 @@ export default function PositionControl({
           </Typography>
           <Slider
             value={position.x}
-            onChange={(_, v) => onPositionChange({ ...position, x: v })}
+            onChange={(_, v) => onPositionChange({ ...position, x: Array.isArray(v) ? v[0] : v })}
             min={0}
             max={maxX}
             color="secondary"
@@ -127,7 +139,7 @@ export default function PositionControl({
           </Typography>
           <Slider
             value={position.y}
-            onChange={(_, v) => onPositionChange({ ...position, y: v })}
+            onChange={(_, v) => onPositionChange({ ...position, y: Array.isArray(v) ? v[0] : v })}
             min={0}
             max={maxY}
             color="secondary"

@@ -14,9 +14,14 @@ import Avatar from '@mui/material/Avatar'
 import Typography from '@mui/material/Typography'
 import Divider from '@mui/material/Divider'
 import Box from '@mui/material/Box'
-import { GitHub, Link as LinkIcon, Favorite } from '@mui/icons-material'
+import { GitHub, Favorite } from '@mui/icons-material'
 
-export default function Info({ open, handleClose }) {
+interface InfoProps {
+  open: boolean
+  handleClose: () => void
+}
+
+export default function Info({ open, handleClose }: InfoProps) {
   return (
     <Dialog
       open={open}

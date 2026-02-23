@@ -3,10 +3,17 @@
 
 import { FormControlLabel, Switch } from '@mui/material'
 
-/**
- * Switch with label
- */
-export default function ToggleOption({ label, checked, onChange }) {
+interface ToggleOptionProps {
+  label: string
+  checked: boolean
+  onChange: (checked: boolean) => void
+}
+
+export default function ToggleOption({
+  label,
+  checked,
+  onChange
+}: ToggleOptionProps) {
   return (
     <FormControlLabel
       control={

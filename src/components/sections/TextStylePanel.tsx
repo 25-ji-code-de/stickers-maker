@@ -14,6 +14,35 @@ import ResponsiveSlider from '../controls/ResponsiveSlider'
 import ColorPickerWithReset from '../controls/ColorPickerWithReset'
 import ToggleOption from '../controls/ToggleOption'
 import characters from '../../characters.json'
+import { FontKey } from '../../types'
+
+interface TextStylePanelProps {
+  character: number
+  text: string
+  setText: (text: string) => void
+  fontSize: number
+  setFontSize: (size: number) => void
+  rotate: number
+  setRotate: (rotate: number) => void
+  spaceSize: number
+  setSpaceSize: (size: number) => void
+  letterSpacing: number
+  setLetterSpacing: (spacing: number) => void
+  strokeWidth: number
+  setStrokeWidth: (width: number) => void
+  fontKey: FontKey
+  setFontKey: (key: FontKey) => void
+  textColor: string
+  setTextColor: (color: string) => void
+  strokeColor: string
+  setStrokeColor: (color: string) => void
+  curve: boolean
+  setCurve: (curve: boolean) => void
+  vertical: boolean
+  setVertical: (vertical: boolean) => void
+  textBehind: boolean
+  setTextBehind: (behind: boolean) => void
+}
 
 /**
  * Panel that groups all text styling controls together
@@ -44,7 +73,7 @@ export default function TextStylePanel({
   setVertical,
   textBehind,
   setTextBehind,
-}) {
+}: TextStylePanelProps) {
   return (
     <>
       <TextField
@@ -105,7 +134,7 @@ export default function TextStylePanel({
             <InputLabel color="secondary">字体</InputLabel>
             <Select
               value={fontKey}
-              onChange={(e) => setFontKey(e.target.value)}
+              onChange={(e) => setFontKey(e.target.value as FontKey)}
               label="字体"
               color="secondary"
             >
