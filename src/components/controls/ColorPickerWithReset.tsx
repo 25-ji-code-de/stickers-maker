@@ -3,10 +3,22 @@
 
 import { Box, Typography, TextField, Button } from '@mui/material'
 
+interface ColorPickerWithResetProps {
+  label: string
+  value: string
+  onChange: (color: string) => void
+  defaultColor: string
+}
+
 /**
  * Color input with reset button
  */
-export default function ColorPickerWithReset({ label, value, onChange, defaultColor }) {
+export default function ColorPickerWithReset({
+  label,
+  value,
+  onChange,
+  defaultColor
+}: ColorPickerWithResetProps) {
   return (
     <>
       <Typography variant="body2" gutterBottom>

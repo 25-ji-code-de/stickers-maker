@@ -2,6 +2,7 @@
 // Copyright (C) 2026 The 25-ji-code-de Team
 
 import { useState, useCallback } from 'react'
+import { StrokeSettings } from '../types'
 
 const DEFAULT_STROKE_WIDTH = 9
 const DEFAULT_STROKE_COLOR = '#ffffff'
@@ -9,11 +10,11 @@ const DEFAULT_STROKE_COLOR = '#ffffff'
 /**
  * Hook for managing stroke/outline settings
  */
-export function useStroke() {
-  const [strokeWidth, setStrokeWidth] = useState(DEFAULT_STROKE_WIDTH)
-  const [strokeColor, setStrokeColor] = useState(DEFAULT_STROKE_COLOR)
+export function useStroke(): StrokeSettings {
+  const [strokeWidth, setStrokeWidth] = useState<number>(DEFAULT_STROKE_WIDTH)
+  const [strokeColor, setStrokeColor] = useState<string>(DEFAULT_STROKE_COLOR)
 
-  const resetStroke = useCallback(() => {
+  const resetStroke = useCallback((): void => {
     setStrokeWidth(DEFAULT_STROKE_WIDTH)
     setStrokeColor(DEFAULT_STROKE_COLOR)
   }, [])

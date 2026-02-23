@@ -2,19 +2,19 @@
 // Copyright (C) 2026 The 25-ji-code-de Team
 
 import { useState, useCallback } from 'react'
-import { Position } from '../types'
+import { Position, PositionHook } from '../types'
 
 /**
  * Hook for managing text position with helper methods
  */
-export function usePosition(initialX: number = 0, initialY: number = 0) {
+export function usePosition(initialX: number = 0, initialY: number = 0): PositionHook {
   const [position, setPosition] = useState<Position>({ x: initialX, y: initialY })
 
-  const moveX = useCallback((delta: number) => {
+  const moveX = useCallback((delta: number): void => {
     setPosition((prev) => ({ ...prev, x: prev.x + delta }))
   }, [])
 
-  const moveY = useCallback((delta: number) => {
+  const moveY = useCallback((delta: number): void => {
     setPosition((prev) => ({ ...prev, y: prev.y + delta }))
   }, [])
 

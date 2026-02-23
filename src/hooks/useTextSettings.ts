@@ -3,9 +3,9 @@
 
 import { useState, useCallback } from 'react'
 import characters from '../characters.json'
-import { Character } from '../types'
+import { Character, TextSettings, FontKey } from '../types'
 
-const DEFAULT_FONT_KEY = 'yuruka'
+const DEFAULT_FONT_KEY: FontKey = 'yuruka'
 
 // Type assertion for characters.json
 const typedCharacters = characters as Character[]
@@ -13,19 +13,19 @@ const typedCharacters = characters as Character[]
 /**
  * Hook for managing all text styling properties
  */
-export function useTextSettings(character: number) {
-  const [text, setText] = useState(typedCharacters[character].defaultText.text || '请输入文本')
-  const [fontSize, setFontSize] = useState(typedCharacters[character].defaultText.s)
-  const [fontKey, setFontKey] = useState(DEFAULT_FONT_KEY)
-  const [rotate, setRotate] = useState(typedCharacters[character].defaultText.r)
-  const [spaceSize, setSpaceSize] = useState(25)
-  const [letterSpacing, setLetterSpacing] = useState(0)
-  const [curve, setCurve] = useState(false)
-  const [vertical, setVertical] = useState(false)
-  const [textBehind, setTextBehind] = useState(false)
+export function useTextSettings(character: number): TextSettings {
+  const [text, setText] = useState<string>(typedCharacters[character].defaultText.text || '请输入文本')
+  const [fontSize, setFontSize] = useState<number>(typedCharacters[character].defaultText.s)
+  const [fontKey, setFontKey] = useState<FontKey>(DEFAULT_FONT_KEY)
+  const [rotate, setRotate] = useState<number>(typedCharacters[character].defaultText.r)
+  const [spaceSize, setSpaceSize] = useState<number>(25)
+  const [letterSpacing, setLetterSpacing] = useState<number>(0)
+  const [curve, setCurve] = useState<boolean>(false)
+  const [vertical, setVertical] = useState<boolean>(false)
+  const [textBehind, setTextBehind] = useState<boolean>(false)
 
   const resetTextSettings = useCallback(
-    (currentCharacter: number) => {
+    (currentCharacter: number): void => {
       const char = typedCharacters[currentCharacter]
       setText(char.defaultText.text || '请输入文本')
       setFontSize(char.defaultText.s)

@@ -2,21 +2,22 @@
 // Copyright (C) 2026 The 25-ji-code-de Team
 
 import { useState, useCallback } from 'react'
+import { UIState } from '../types'
 
 /**
  * Hook for managing UI state (modals and notifications)
  */
-export function useUIState() {
-  const [infoOpen, setInfoOpen] = useState(false)
-  const [uploadOpen, setUploadOpen] = useState(false)
-  const [copyPopupOpen, setCopyPopupOpen] = useState(false)
-  const [downloadPopupOpen, setDownloadPopupOpen] = useState(false)
+export function useUIState(): UIState {
+  const [infoOpen, setInfoOpen] = useState<boolean>(false)
+  const [uploadOpen, setUploadOpen] = useState<boolean>(false)
+  const [copyPopupOpen, setCopyPopupOpen] = useState<boolean>(false)
+  const [downloadPopupOpen, setDownloadPopupOpen] = useState<boolean>(false)
 
-  const showCopySuccess = useCallback(() => {
+  const showCopySuccess = useCallback((): void => {
     setCopyPopupOpen(true)
   }, [])
 
-  const showDownloadSuccess = useCallback(() => {
+  const showDownloadSuccess = useCallback((): void => {
     setDownloadPopupOpen(true)
   }, [])
 
