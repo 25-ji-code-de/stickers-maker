@@ -163,12 +163,12 @@ export function useCanvasDrawing() {
           drawText(ctx, text, position, rotate, textSettings, colors, stroke, angle)
         }
       } else {
-        ctx.fillStyle = '#212121'
+        // 空状态 - 显示渐变背景
+        const gradient = ctx.createLinearGradient(0, 0, w, h)
+        gradient.addColorStop(0, '#2a2a2a')
+        gradient.addColorStop(1, '#1a1a1a')
+        ctx.fillStyle = gradient
         ctx.fillRect(0, 0, w, h)
-        ctx.font = '20px sans-serif'
-        ctx.fillStyle = 'white'
-        ctx.textAlign = 'center'
-        ctx.fillText('Pick a character to start ↘️', w / 2, h - 10)
       }
     },
     [drawText]

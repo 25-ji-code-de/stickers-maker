@@ -48,7 +48,9 @@ import { useCanvasDrawing } from './hooks/useCanvasDrawing'
 import { useExport } from './hooks/useExport'
 import { useUIState } from './hooks/useUIState'
 import { useHistory } from './hooks/useHistory'
+import { useFontLoader } from './hooks/useFontLoader'
 import { StickerConfig } from './types'
+import FontLoadingOverlay from './components/FontLoadingOverlay'
 
 function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -84,6 +86,9 @@ function App() {
   )
 
   const history = useHistory()
+
+  // Monitor font loading status
+  const { fontsReady, progress: fontProgress } = useFontLoader()
 
   // Update text settings and position when character changes
   useEffect(() => {
@@ -295,6 +300,7 @@ function App() {
                     sx={{
                       width: { xs: '237px', md: '296px' },
                       height: { xs: '205px', md: '256px' },
+                      position: 'relative',
                     }}
                   >
                     <Canvas
@@ -307,6 +313,11 @@ function App() {
                         height: '100%',
                       }}
                     />
+
+                    {/* Font loading overlay */}
+                    {!fontsReady && (
+                      <FontLoadingOverlay progress={fontProgress} />
+                    )}
                   </Box>
 
                   {/* Mobile: Horizontal slider */}
