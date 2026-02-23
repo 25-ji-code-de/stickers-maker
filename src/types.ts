@@ -213,3 +213,28 @@ export interface UseKeyboardShortcutsReturn {
   isInputFocused: boolean
   shortcutsEnabled: boolean
 }
+
+/**
+ * History sorting type
+ */
+export type HistorySortType = 'newest' | 'oldest' | 'uploaded-first'
+
+/**
+ * Time range filter for history
+ */
+export type TimeRangeFilter = 'all' | 'today' | 'week' | 'month' | 'earlier'
+
+/**
+ * Upload status filter for history
+ */
+export type UploadStatusFilter = 'all' | 'uploaded' | 'not-uploaded'
+
+/**
+ * Complete filter state for history
+ */
+export interface HistoryFilters {
+  searchText: string
+  sortType: HistorySortType
+  uploadStatus: UploadStatusFilter
+  timeRange: TimeRangeFilter
+}

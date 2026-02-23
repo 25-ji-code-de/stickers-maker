@@ -17,10 +17,24 @@ import {
   Alert,
   useMediaQuery,
   useTheme,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Grid,
+  SelectChangeEvent,
 } from '@mui/material'
-import { Delete, DeleteSweep, Restore, Link as LinkIcon } from '@mui/icons-material'
-import { useState } from 'react'
-import { HistoryItem } from '../../types'
+import { Delete, DeleteSweep, Restore, Link as LinkIcon, Search as SearchIcon } from '@mui/icons-material'
+import { useState, useMemo } from 'react'
+import {
+  HistoryItem,
+  HistoryFilters,
+  HistorySortType,
+  UploadStatusFilter,
+  TimeRangeFilter,
+} from '../../types'
+import { filterAndSortHistory } from '../../utils/historyUtils'
 
 interface HistoryPanelProps {
   historyItems: HistoryItem[]
@@ -37,8 +51,31 @@ export default function HistoryPanel({
 }: HistoryPanelProps) {
   const [confirmClearOpen, setConfirmClearOpen] = useState(false)
   const [selectedItem, setSelectedItem] = useState<HistoryItem | null>(null)
+
+  // Filter state
+  const [filters, setFilters] = useState<HistoryFilters>({
+    searchText: '',
+    sortType: 'newest',
+    uploadStatus: 'all',
+    timeRange: 'all',
+  })
+
   const theme = useTheme()
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'))
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+
+  // Apply filters and sorting
+  const filteredItems = useMemo(
+    () => filterAndSortHistory(historyItems, filters),
+    [historyItems, filters]
+  )
+
+  // Check if any filters are active
+  const hasActiveFilters =
+    filters.searchText ||
+    filters.sortType !== 'newest' ||
+    filters.uploadStatus !== 'all' ||
+    filters.timeRange !== 'all'
 
   const formatTimestamp = (timestamp: number): string => {
     const date = new Date(timestamp)
@@ -78,6 +115,23 @@ export default function HistoryPanel({
     setConfirmClearOpen(false)
   }
 
+  // Filter handlers
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFilters(prev => ({ ...prev, searchText: e.target.value }))
+  }
+
+  const handleSortChange = (e: SelectChangeEvent<HistorySortType>) => {
+    setFilters(prev => ({ ...prev, sortType: e.target.value as HistorySortType }))
+  }
+
+  const handleUploadFilterChange = (e: SelectChangeEvent<UploadStatusFilter>) => {
+    setFilters(prev => ({ ...prev, uploadStatus: e.target.value as UploadStatusFilter }))
+  }
+
+  const handleTimeRangeChange = (e: SelectChangeEvent<TimeRangeFilter>) => {
+    setFilters(prev => ({ ...prev, timeRange: e.target.value as TimeRangeFilter }))
+  }
+
   if (historyItems.length === 0) {
     return (
       <Box textAlign="center" py={4}>
@@ -95,7 +149,10 @@ export default function HistoryPanel({
     <Box>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
         <Typography variant="h6" component="h3">
-          历史记录 ({historyItems.length})
+          历史记录
+          {hasActiveFilters
+            ? ` (显示 ${filteredItems.length} / 总计 ${historyItems.length})`
+            : ` (${historyItems.length})`}
         </Typography>
         <Tooltip title="清空全部历史">
           <IconButton
@@ -108,8 +165,91 @@ export default function HistoryPanel({
         </Tooltip>
       </Box>
 
-      <ImageList cols={isSmallScreen ? 3 : 4} gap={8} sx={{ maxHeight: 400, overflow: 'auto' }}>
-        {historyItems.map((item) => (
+      {/* Control Bar */}
+      <Box mb={2}>
+        <Grid container spacing={1} alignItems="center">
+          {/* Search Box */}
+          <Grid item xs={12} md={4}>
+            <TextField
+              fullWidth
+              size="small"
+              placeholder="搜索文字或角色..."
+              value={filters.searchText}
+              onChange={handleSearchChange}
+              InputProps={{
+                startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />,
+              }}
+            />
+          </Grid>
+
+          {/* Sort Selector */}
+          <Grid item xs={6} md={3}>
+            <FormControl fullWidth size="small">
+              <InputLabel>排序</InputLabel>
+              <Select
+                value={filters.sortType}
+                label="排序"
+                onChange={handleSortChange}
+              >
+                <MenuItem value="newest">最新优先</MenuItem>
+                <MenuItem value="oldest">最旧优先</MenuItem>
+                <MenuItem value="uploaded-first">已上传优先</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+
+          {/* Upload Status Filter */}
+          <Grid item xs={6} md={2.5}>
+            <FormControl fullWidth size="small">
+              <InputLabel>状态</InputLabel>
+              <Select
+                value={filters.uploadStatus}
+                label="状态"
+                onChange={handleUploadFilterChange}
+              >
+                <MenuItem value="all">全部</MenuItem>
+                <MenuItem value="uploaded">已上传</MenuItem>
+                <MenuItem value="not-uploaded">未上传</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+
+          {/* Time Range Filter */}
+          <Grid item xs={12} md={2.5}>
+            <FormControl fullWidth size="small">
+              <InputLabel>时间</InputLabel>
+              <Select
+                value={filters.timeRange}
+                label="时间"
+                onChange={handleTimeRangeChange}
+              >
+                <MenuItem value="all">全部</MenuItem>
+                <MenuItem value="today">今天</MenuItem>
+                <MenuItem value="week">本周</MenuItem>
+                <MenuItem value="month">本月</MenuItem>
+                <MenuItem value="earlier">更早</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+        </Grid>
+      </Box>
+
+      {/* Empty State for Filtered Results */}
+      {filteredItems.length === 0 && historyItems.length > 0 && (
+        <Box textAlign="center" py={4}>
+          <Typography variant="body2" color="text.secondary">
+            未找到符合条件的历史记录
+          </Typography>
+          <Typography variant="caption" color="text.secondary" display="block" mt={1}>
+            尝试调整筛选条件
+          </Typography>
+        </Box>
+      )}
+
+      {/* Image Grid */}
+      {filteredItems.length > 0 && (
+        <ImageList cols={isSmallScreen ? 3 : 4} gap={8} sx={{ maxHeight: 400, overflow: 'auto' }}>
+          {filteredItems.map((item) => (
           <ImageListItem
             key={item.id}
             sx={{
@@ -158,6 +298,7 @@ export default function HistoryPanel({
           </ImageListItem>
         ))}
       </ImageList>
+      )}
 
       {/* Detail Dialog */}
       <Dialog
