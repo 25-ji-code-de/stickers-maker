@@ -87,6 +87,8 @@ export interface UIState {
   setResetConfirmOpen: (open: boolean) => void
   shortcutsHelpOpen: boolean
   setShortcutsHelpOpen: (open: boolean) => void
+  galleryOpen: boolean
+  setGalleryOpen: (open: boolean) => void
 }
 
 export interface CharacterHook {
@@ -237,4 +239,44 @@ export interface HistoryFilters {
   sortType: HistorySortType
   uploadStatus: UploadStatusFilter
   timeRange: TimeRangeFilter
+}
+
+/**
+ * Gallery item from manifest
+ */
+export interface GalleryItem {
+  id: string
+  url: string
+  title: string
+  author?: string
+  characterId?: number
+  tags: string[]
+  uploadDate: string
+  description?: string
+  featured?: boolean
+}
+
+/**
+ * Gallery manifest structure
+ */
+export interface GalleryManifest {
+  version: string
+  lastUpdated: string
+  items: GalleryItem[]
+}
+
+/**
+ * Gallery sorting type
+ */
+export type GallerySortType = 'newest' | 'oldest' | 'featured-first'
+
+/**
+ * Complete filter state for gallery
+ */
+export interface GalleryFilters {
+  searchText: string
+  sortType: GallerySortType
+  character: string | 'all' // Character base name (without number suffix)
+  timeRange: TimeRangeFilter
+  selectedTags: string[]
 }

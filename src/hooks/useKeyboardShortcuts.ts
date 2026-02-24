@@ -71,6 +71,11 @@ export function useKeyboardShortcuts(config: KeyboardShortcutsConfig): UseKeyboa
           e.preventDefault()
           return
         }
+        if (config.uiState.galleryOpen) {
+          config.uiState.setGalleryOpen(false)
+          e.preventDefault()
+          return
+        }
         if (config.uiState.historyOpen) {
           config.uiState.setHistoryOpen(false)
           e.preventDefault()
@@ -152,6 +157,11 @@ export function useKeyboardShortcuts(config: KeyboardShortcutsConfig): UseKeyboa
           if (key === 'h') {
             e.preventDefault()
             config.uiState.setHistoryOpen(true)
+            return
+          }
+          if (key === 'g') {
+            e.preventDefault()
+            config.uiState.setGalleryOpen(true)
             return
           }
           if (key === 'r') {

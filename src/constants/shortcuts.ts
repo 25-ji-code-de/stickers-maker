@@ -37,6 +37,7 @@ export const SHORTCUTS_CONFIG: ShortcutCategory[] = [
       { keys: ['Ctrl', 'Y'], description: '重做' },
       { keys: ['Ctrl', 'Shift', 'Z'], description: '重做（备选）' },
       { keys: ['Ctrl', 'H'], description: '打开历史记录' },
+      { keys: ['Ctrl', 'G'], description: '打开探索画廊' },
       { keys: ['Ctrl', 'R'], description: '重置所有设置' },
       { keys: ['Ctrl', 'I'], description: '打开关于页面' },
       { keys: ['?'], description: '打开快捷键帮助' },

@@ -25,7 +25,7 @@ import {
   Grid,
   SelectChangeEvent,
 } from '@mui/material'
-import { Delete, DeleteSweep, Restore, Link as LinkIcon, Search as SearchIcon } from '@mui/icons-material'
+import { Delete, DeleteSweep, Restore, Link as LinkIcon, Search as SearchIcon, Explore } from '@mui/icons-material'
 import { useState, useMemo } from 'react'
 import {
   HistoryItem,
@@ -35,6 +35,7 @@ import {
   TimeRangeFilter,
 } from '../../types'
 import { filterAndSortHistory } from '../../utils/historyUtils'
+import GallerySubmitDialog from '../GallerySubmitDialog'
 
 interface HistoryPanelProps {
   historyItems: HistoryItem[]
@@ -51,6 +52,7 @@ export default function HistoryPanel({
 }: HistoryPanelProps) {
   const [confirmClearOpen, setConfirmClearOpen] = useState(false)
   const [selectedItem, setSelectedItem] = useState<HistoryItem | null>(null)
+  const [submitDialogOpen, setSubmitDialogOpen] = useState(false)
 
   // Filter state
   const [filters, setFilters] = useState<HistoryFilters>({
@@ -113,6 +115,10 @@ export default function HistoryPanel({
   const handleClearAll = () => {
     onClearHistory()
     setConfirmClearOpen(false)
+  }
+
+  const handleSubmitToGallery = () => {
+    setSubmitDialogOpen(true)
   }
 
   // Filter handlers
@@ -365,6 +371,16 @@ export default function HistoryPanel({
               >
                 删除
               </Button>
+              <Box sx={{ flexGrow: 1 }} />
+              {selectedItem.uploadedUrl && (
+                <Button
+                  startIcon={<Explore />}
+                  color="primary"
+                  onClick={handleSubmitToGallery}
+                >
+                  提交到画廊
+                </Button>
+              )}
               <Button onClick={() => setSelectedItem(null)}>取消</Button>
               <Button
                 variant="contained"
@@ -397,6 +413,13 @@ export default function HistoryPanel({
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Gallery Submit Dialog */}
+      <GallerySubmitDialog
+        open={submitDialogOpen}
+        onClose={() => setSubmitDialogOpen(false)}
+        historyItem={selectedItem}
+      />
     </Box>
   )
 }

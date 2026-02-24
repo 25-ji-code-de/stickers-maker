@@ -27,6 +27,7 @@ import {
   Undo,
   Redo,
   HelpOutline,
+  Explore,
 } from '@mui/icons-material'
 import { useCallback, useEffect, useRef, lazy, Suspense } from 'react'
 import characters from './characters.json'
@@ -41,6 +42,7 @@ import ExportPanel from './components/sections/ExportPanel'
 const Info = lazy(() => import('./components/Info'))
 const UploadDialog = lazy(() => import('./components/UploadDialog'))
 const HistoryPanel = lazy(() => import('./components/sections/HistoryPanel'))
+const GalleryPanel = lazy(() => import('./components/sections/GalleryPanel'))
 const PWAUpdatePrompt = lazy(() => import('./components/PWAUpdatePrompt'))
 
 import { useCharacter } from './hooks/useCharacter'
@@ -441,6 +443,11 @@ function App() {
                     <History />
                   </IconButton>
                 </Tooltip>
+                <Tooltip title="探索画廊">
+                  <IconButton color="secondary" onClick={() => uiState.setGalleryOpen(true)}>
+                    <Explore />
+                  </IconButton>
+                </Tooltip>
                 <Tooltip title="快捷键帮助">
                   <IconButton color="secondary" onClick={() => uiState.setShortcutsHelpOpen(true)}>
                     <HelpOutline />
@@ -701,43 +708,64 @@ function App() {
         <Box
           sx={{
             display: { xs: 'flex', md: 'none' },
-            justifyContent: 'center',
+            flexDirection: 'column',
             gap: 1.5,
             mt: 3,
             pb: 2,
           }}
         >
-          <Tooltip title="历史记录">
-            <Button
-              variant="outlined"
-              color="secondary"
-              startIcon={<History />}
-              onClick={() => uiState.setHistoryOpen(true)}
-            >
-              历史
-            </Button>
-          </Tooltip>
-          <Tooltip title="关于">
-            <Button
-              variant="outlined"
-              color="secondary"
-              startIcon={<InfoOutlined />}
-              onClick={() => uiState.setInfoOpen(true)}
-            >
-              关于
-            </Button>
-          </Tooltip>
-          <Tooltip title="GitHub">
-            <Button
-              variant="outlined"
-              color="secondary"
-              startIcon={<GitHub />}
-              href="https://github.com/25-ji-code-de/stickers-maker"
-              target="_blank"
-            >
-              GitHub
-            </Button>
-          </Tooltip>
+          {/* First row: History and Gallery */}
+          <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1.5 }}>
+            <Tooltip title="历史记录">
+              <Button
+                variant="outlined"
+                color="secondary"
+                startIcon={<History />}
+                onClick={() => uiState.setHistoryOpen(true)}
+                sx={{ flex: 1, maxWidth: 160 }}
+              >
+                历史
+              </Button>
+            </Tooltip>
+            <Tooltip title="探索画廊">
+              <Button
+                variant="outlined"
+                color="secondary"
+                startIcon={<Explore />}
+                onClick={() => uiState.setGalleryOpen(true)}
+                sx={{ flex: 1, maxWidth: 160 }}
+              >
+                画廊
+              </Button>
+            </Tooltip>
+          </Box>
+
+          {/* Second row: About and GitHub */}
+          <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1.5 }}>
+            <Tooltip title="关于">
+              <Button
+                variant="outlined"
+                color="secondary"
+                startIcon={<InfoOutlined />}
+                onClick={() => uiState.setInfoOpen(true)}
+                sx={{ flex: 1, maxWidth: 160 }}
+              >
+                关于
+              </Button>
+            </Tooltip>
+            <Tooltip title="GitHub">
+              <Button
+                variant="outlined"
+                color="secondary"
+                startIcon={<GitHub />}
+                href="https://github.com/25-ji-code-de/stickers-maker"
+                target="_blank"
+                sx={{ flex: 1, maxWidth: 160 }}
+              >
+                GitHub
+              </Button>
+            </Tooltip>
+          </Box>
         </Box>
       </Box>
 
@@ -772,12 +800,31 @@ function App() {
       </Suspense>
 
       <Suspense fallback={null}>
+        <Dialog
+          open={uiState.galleryOpen}
+          onClose={() => uiState.setGalleryOpen(false)}
+          maxWidth="lg"
+          fullWidth
+        >
+          <DialogTitle>探索画廊</DialogTitle>
+          <DialogContent>
+            <GalleryPanel />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => uiState.setGalleryOpen(false)}>关闭</Button>
+          </DialogActions>
+        </Dialog>
+      </Suspense>
+
+      <Suspense fallback={null}>
         <UploadDialog
           open={uiState.uploadOpen}
           onClose={() => uiState.setUploadOpen(false)}
           canvas={canvasRef.current}
           altText={textSettings.text}
           onUploadSuccess={(url) => saveToHistory(url)}
+          characterId={characterHook.character}
+          customImage={characterHook.customImage}
         />
       </Suspense>
 

@@ -16,7 +16,8 @@ import {
   Tab,
 } from '@mui/material'
 import { Close, ContentCopy, CloudUpload } from '@mui/icons-material'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import GallerySubmitForm from './GallerySubmitForm'
 
 interface UploadDialogProps {
   open: boolean
@@ -24,15 +25,24 @@ interface UploadDialogProps {
   canvas: HTMLCanvasElement | null
   altText?: string
   onUploadSuccess?: (url: string) => void
+  characterId?: number
+  customImage?: string | null
 }
 
-function UploadDialog({ open, onClose, canvas, altText = '', onUploadSuccess }: UploadDialogProps) {
+function UploadDialog({ open, onClose, canvas, altText = '', onUploadSuccess, characterId, customImage }: UploadDialogProps) {
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [uploadedUrl, setUploadedUrl] = useState('')
   const [error, setError] = useState('')
   const [selectedTab, setSelectedTab] = useState(0)
   const [copiedFormat, setCopiedFormat] = useState('')
+
+  // Reset tab when dialog opens/closes
+  useEffect(() => {
+    if (!open) {
+      setSelectedTab(0)
+    }
+  }, [open])
 
   const uploadToStorage = async () => {
     if (!canvas) return
@@ -196,11 +206,12 @@ function UploadDialog({ open, onClose, canvas, altText = '', onUploadSuccess }: 
         {uploadedUrl && (
           <Box>
             <Alert severity="success" sx={{ mb: 2 }}>
-              上传成功！选择格式复制链接：
+              上传成功！选择格式复制链接或提交到画廊：
             </Alert>
 
             <Tabs value={selectedTab} onChange={(_, v) => setSelectedTab(v)} sx={{ mb: 2 }}>
               <Tab label="常用格式" />
+              <Tab label="提交到画廊" />
               <Tab label="预览" />
             </Tabs>
 
@@ -237,6 +248,17 @@ function UploadDialog({ open, onClose, canvas, altText = '', onUploadSuccess }: 
             )}
 
             {selectedTab === 1 && (
+              <GallerySubmitForm
+                uploadedUrl={uploadedUrl}
+                defaultTitle={altText}
+                defaultCharacterId={customImage ? undefined : characterId}
+                onSuccess={() => {
+                  // Keep dialog open to show success message
+                }}
+              />
+            )}
+
+            {selectedTab === 2 && (
               <Box textAlign="center" py={2}>
                 <img
                   src={uploadedUrl}
