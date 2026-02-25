@@ -22,6 +22,7 @@ import {
 import { useState, useEffect } from 'react'
 import { HistoryItem, GalleryItem, GalleryManifest } from '../types'
 import charactersData from '../characters.json'
+import { useAuth } from '../hooks/useAuth'
 
 interface GallerySubmitDialogProps {
   open: boolean
@@ -34,6 +35,7 @@ export default function GallerySubmitDialog({
   onClose,
   historyItem,
 }: GallerySubmitDialogProps) {
+  const { user } = useAuth()
   const [title, setTitle] = useState('')
   const [author, setAuthor] = useState('')
   const [description, setDescription] = useState('')
@@ -58,6 +60,13 @@ export default function GallerySubmitDialog({
       }
     }
   }, [historyItem, open])
+
+  // Auto-fill author from SEKAI Pass user
+  useEffect(() => {
+    if (user && !author && open) {
+      setAuthor(user.username)
+    }
+  }, [user, open])
 
   const handleAddTag = () => {
     const trimmed = tagInput.trim()

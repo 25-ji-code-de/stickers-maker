@@ -18,6 +18,7 @@ import {
 import { useState, useEffect } from 'react'
 import { GalleryItem, GalleryManifest } from '../types'
 import charactersData from '../characters.json'
+import { useAuth } from '../hooks/useAuth'
 
 interface GallerySubmitFormProps {
   uploadedUrl: string
@@ -32,6 +33,7 @@ export default function GallerySubmitForm({
   defaultCharacterId,
   onSuccess,
 }: GallerySubmitFormProps) {
+  const { user } = useAuth()
   const [title, setTitle] = useState('')
   const [author, setAuthor] = useState('')
   const [description, setDescription] = useState('')
@@ -49,6 +51,13 @@ export default function GallerySubmitForm({
       setCharacterId(defaultCharacterId)
     }
   }, [defaultTitle, defaultCharacterId])
+
+  // Auto-fill author from SEKAI Pass user
+  useEffect(() => {
+    if (user && !author) {
+      setAuthor(user.username)
+    }
+  }, [user])
 
   const handleAddTag = () => {
     const trimmed = tagInput.trim()

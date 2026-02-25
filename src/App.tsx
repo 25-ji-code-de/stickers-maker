@@ -37,6 +37,8 @@ import ThemeWrapper from './components/ThemeWrapper'
 import NotificationSnackbar from './components/controls/NotificationSnackbar'
 import TextStylePanel from './components/sections/TextStylePanel'
 import ExportPanel from './components/sections/ExportPanel'
+import LoginButton from './components/auth/LoginButton'
+import UserMenu from './components/auth/UserMenu'
 
 // Lazy load heavy dialog components
 const Info = lazy(() => import('./components/Info'))
@@ -57,6 +59,7 @@ import { useHistory } from './hooks/useHistory'
 import { useFontLoader } from './hooks/useFontLoader'
 import { useUndoRedo } from './hooks/useUndoRedo'
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
+import { useAuth } from './hooks/useAuth'
 import { StickerConfig } from './types'
 import FontLoadingOverlay from './components/FontLoadingOverlay'
 import ShortcutsHelpDialog from './components/ShortcutsHelpDialog'
@@ -67,6 +70,7 @@ function App() {
 
   // Initialize hooks
   const uiState = useUIState()
+  const auth = useAuth()
 
   // Character hook needs a callback to update colors when image loads
   const colorScheme = useColorScheme(49) // Initial character
@@ -467,6 +471,15 @@ function App() {
                     <GitHub />
                   </IconButton>
                 </Tooltip>
+
+                {/* Auth: Login button or User menu */}
+                {auth.isAuthenticated ? (
+                  <UserMenu />
+                ) : (
+                  <Box sx={{ ml: 1 }}>
+                    <LoginButton variant="outlined" size="small" />
+                  </Box>
+                )}
               </Box>
             </Box>
           </Grid>
@@ -765,6 +778,20 @@ function App() {
                 GitHub
               </Button>
             </Tooltip>
+          </Box>
+
+          {/* Third row: Auth (Login or User info) */}
+          <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1.5, mt: 1.5 }}>
+            {auth.isAuthenticated ? (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Typography variant="body2" color="text.secondary">
+                  {auth.user?.username}
+                </Typography>
+                <UserMenu />
+              </Box>
+            ) : (
+              <LoginButton variant="outlined" size="medium" fullWidth />
+            )}
           </Box>
         </Box>
       </Box>
