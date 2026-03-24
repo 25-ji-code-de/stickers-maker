@@ -96,6 +96,7 @@ function App() {
   const exportHooks = useExport(
     canvasRef,
     characterHook.character,
+    characterHook.customImage,
     textSettings.text,
     uiState.setCopyPopupOpen,
     uiState.setDownloadPopupOpen
@@ -610,6 +611,8 @@ function App() {
                     <Picker
                       setCharacter={handleCharacterSelect}
                       color={colorScheme.dominantColor}
+                      disabled={!!characterHook.customImage}
+                      tooltip="请先清除自定义图片"
                     />
                   </Box>
                 </Box>
@@ -707,7 +710,12 @@ function App() {
                 mb={2}
                 sx={{ display: { xs: 'none', md: 'flex' } }}
               >
-                <Picker setCharacter={handleCharacterSelect} color={colorScheme.dominantColor} />
+                <Picker
+                  setCharacter={handleCharacterSelect}
+                  color={colorScheme.dominantColor}
+                  disabled={!!characterHook.customImage}
+                  tooltip="请先清除自定义图片"
+                />
                 <Typography
                   variant="subtitle1"
                   sx={{
@@ -717,7 +725,9 @@ function App() {
                     flex: 1,
                   }}
                 >
-                  {characters[characterHook.character].name}
+                  {characterHook.customImage
+                    ? '自定义图片'
+                    : characters[characterHook.character].name}
                 </Typography>
               </Box>
 

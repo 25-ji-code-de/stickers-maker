@@ -34,20 +34,23 @@ export function useCharacter(
     }
   }, [character, customImage, onImageLoad])
 
-  const handleUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>): void => {
-    const file = e.target.files && e.target.files[0]
-    if (!file) return
-    const reader = new FileReader()
-    reader.onload = (ev: ProgressEvent<FileReader>) => {
-      const result = ev.target && ev.target.result
-      if (typeof result === 'string') {
-        setLoaded(false)
-        setCustomImage(result)
-        if (fileInputRef.current) fileInputRef.current.value = ''
+  const handleUpload = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>): void => {
+      const file = e.target.files && e.target.files[0]
+      if (!file) return
+      const reader = new FileReader()
+      reader.onload = (ev: ProgressEvent<FileReader>) => {
+        const result = ev.target && ev.target.result
+        if (typeof result === 'string') {
+          setLoaded(false)
+          setCustomImage(result)
+          if (fileInputRef.current) fileInputRef.current.value = ''
+        }
       }
-    }
-    reader.readAsDataURL(file)
-  }, [fileInputRef])
+      reader.readAsDataURL(file)
+    },
+    [fileInputRef]
+  )
 
   const clearUpload = useCallback((): void => {
     setLoaded(false)

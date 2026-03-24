@@ -22,6 +22,8 @@ import { PersonSearch } from '@mui/icons-material'
 interface PickerProps {
   setCharacter: (index: number) => void
   color: string
+  disabled?: boolean
+  tooltip?: string
 }
 
 const pickerItemSx = {
@@ -34,7 +36,7 @@ const pickerItemSx = {
   },
 }
 
-export default function Picker({ setCharacter, color }: PickerProps) {
+export default function Picker({ setCharacter, color, disabled = false, tooltip }: PickerProps) {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
   const [search, setSearch] = useState('')
   const theme = useTheme()
@@ -42,19 +44,26 @@ export default function Picker({ setCharacter, color }: PickerProps) {
 
   const open = Boolean(anchorEl)
 
-  const handleOpen = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget)
-  }, [])
+  const handleOpen = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      if (disabled) return // 禁用时不打开
+      setAnchorEl(event.currentTarget)
+    },
+    [disabled]
+  )
 
   const handleClose = useCallback(() => {
     setAnchorEl(null)
     setSearch('') // 关闭时清空搜索
   }, [])
 
-  const handleCharacterSelect = useCallback((index: number) => {
-    handleClose()
-    setCharacter(index)
-  }, [handleClose, setCharacter])
+  const handleCharacterSelect = useCallback(
+    (index: number) => {
+      handleClose()
+      setCharacter(index)
+    },
+    [handleClose, setCharacter]
+  )
 
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value)
@@ -91,7 +100,7 @@ export default function Picker({ setCharacter, color }: PickerProps) {
 
   // 统一使用 IconButton 触发器
   const triggerButton = (
-    <Tooltip title="选择角色">
+    <Tooltip title={disabled && tooltip ? tooltip : '选择角色'}>
       <IconButton
         color="secondary"
         onClick={handleOpen}
@@ -108,12 +117,7 @@ export default function Picker({ setCharacter, color }: PickerProps) {
     return (
       <>
         {triggerButton}
-        <Dialog
-          open={open}
-          onClose={handleClose}
-          maxWidth="md"
-          fullWidth
-        >
+        <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
           <DialogTitle>选择角色</DialogTitle>
           <DialogContent>
             <TextField
@@ -164,8 +168,8 @@ export default function Picker({ setCharacter, color }: PickerProps) {
               mt: 1,
               overflow: 'hidden',
               maxWidth: 560,
-            }
-          }
+            },
+          },
         }}
       >
         <Box sx={{ p: 1.5 }}>

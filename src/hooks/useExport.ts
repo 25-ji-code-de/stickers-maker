@@ -15,22 +15,27 @@ const typedCharacters = characters as Character[]
 export function useExport(
   canvasRef: RefObject<HTMLCanvasElement>,
   character: number,
+  customImage: string | null,
   text: string,
   setCopyPopupOpen: (open: boolean) => void,
   setDownloadPopupOpen: (open: boolean) => void
 ): ExportHooks {
-  const generateFileName = useCallback((ext: string): string => {
-    // Remove spaces and illegal characters
-    const sanitize = (str: string): string => str.replace(/[\s\/\\:*?"<>|]/g, '')
-    const characterName = sanitize(typedCharacters[character].name)
+  const generateFileName = useCallback(
+    (ext: string): string => {
+      // Remove spaces and illegal characters
+      const sanitize = (str: string): string => str.replace(/[\s\/\\:*?"<>|]/g, '')
 
-    // If text is not default, add it to filename (max 10 characters)
-    if (text && text !== '请输入文本') {
-      const sanitizedText = sanitize(text).slice(0, 10)
-      return `${characterName}_${sanitizedText}.${ext}`
-    }
-    return `${characterName}.${ext}`
-  }, [character, text])
+      const characterName = customImage ? '自定义角色' : sanitize(typedCharacters[character].name)
+
+      // If text is not default, add it to filename (max 10 characters)
+      if (text && text !== '请输入文本') {
+        const sanitizedText = sanitize(text).slice(0, 10)
+        return `${characterName}_${sanitizedText}.${ext}`
+      }
+      return `${characterName}.${ext}`
+    },
+    [character, text]
+  )
 
   const download = useCallback(async (): Promise<void> => {
     const canvas = canvasRef.current
