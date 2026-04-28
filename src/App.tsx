@@ -76,9 +76,12 @@ function App() {
   const colorScheme = useColorScheme(49) // Initial character
 
   // Use useCallback to stabilize the onImageLoad callback
-  const handleImageLoad = useCallback((img: HTMLImageElement) => {
-    colorScheme.updateColorsFromImage(img)
-  }, [colorScheme.updateColorsFromImage])
+  const handleImageLoad = useCallback(
+    (img: HTMLImageElement) => {
+      colorScheme.updateColorsFromImage(img)
+    },
+    [colorScheme.updateColorsFromImage]
+  )
 
   const characterHook = useCharacter(fileInputRef, handleImageLoad)
 
@@ -93,6 +96,7 @@ function App() {
   const exportHooks = useExport(
     canvasRef,
     characterHook.character,
+    characterHook.customImage,
     textSettings.text,
     uiState.setCopyPopupOpen,
     uiState.setDownloadPopupOpen
@@ -202,12 +206,15 @@ function App() {
   ])
 
   // Save current sticker to history (with auto-deduplication)
-  const saveToHistory = useCallback((uploadedUrl?: string) => {
-    if (!canvasRef.current) return
+  const saveToHistory = useCallback(
+    (uploadedUrl?: string) => {
+      if (!canvasRef.current) return
 
-    const config = getCurrentConfig()
-    history.addHistory(config, canvasRef.current, uploadedUrl)
-  }, [getCurrentConfig, history])
+      const config = getCurrentConfig()
+      history.addHistory(config, canvasRef.current, uploadedUrl)
+    },
+    [getCurrentConfig, history]
+  )
 
   // Wrap export functions to auto-save to history
   const handleDownload = useCallback(async () => {
@@ -236,56 +243,62 @@ function App() {
   }, [exportHooks, saveToHistory])
 
   // Load configuration from history
-  const loadFromHistory = useCallback((id: string) => {
-    const config = history.loadHistory(id)
-    if (!config) return
+  const loadFromHistory = useCallback(
+    (id: string) => {
+      const config = history.loadHistory(id)
+      if (!config) return
 
-    // Apply all settings
-    characterHook.setCharacter(config.character)
-    textSettings.setText(config.text)
-    textSettings.setFontSize(config.fontSize)
-    textSettings.setFontKey(config.fontKey)
-    textSettings.setRotate(config.rotate)
-    textSettings.setSpaceSize(config.spaceSize)
-    textSettings.setLetterSpacing(config.letterSpacing)
-    textSettings.setCurve(config.curve)
-    textSettings.setVertical(config.vertical)
-    textSettings.setTextBehind(config.textBehind)
-    position.setPosition(config.position)
-    stroke.setStrokeWidth(config.strokeWidth)
-    stroke.setStrokeColor(config.strokeColor)
-    colorScheme.setTextColor(config.textColor)
+      // Apply all settings
+      characterHook.setCharacter(config.character)
+      textSettings.setText(config.text)
+      textSettings.setFontSize(config.fontSize)
+      textSettings.setFontKey(config.fontKey)
+      textSettings.setRotate(config.rotate)
+      textSettings.setSpaceSize(config.spaceSize)
+      textSettings.setLetterSpacing(config.letterSpacing)
+      textSettings.setCurve(config.curve)
+      textSettings.setVertical(config.vertical)
+      textSettings.setTextBehind(config.textBehind)
+      position.setPosition(config.position)
+      stroke.setStrokeWidth(config.strokeWidth)
+      stroke.setStrokeColor(config.strokeColor)
+      colorScheme.setTextColor(config.textColor)
 
-    // Handle custom image if present
-    if (config.customImage && config.customImage !== characterHook.customImage) {
-      // Note: Custom images are stored as data URLs, so they can be restored
-      // This is handled automatically by the character hook
-    }
-  }, [history, characterHook, textSettings, position, stroke, colorScheme])
+      // Handle custom image if present
+      if (config.customImage && config.customImage !== characterHook.customImage) {
+        // Note: Custom images are stored as data URLs, so they can be restored
+        // This is handled automatically by the character hook
+      }
+    },
+    [history, characterHook, textSettings, position, stroke, colorScheme]
+  )
 
   // Apply configuration (used by both history and undo/redo)
-  const applyConfig = useCallback((config: StickerConfig) => {
-    isRestoringState.current = true
+  const applyConfig = useCallback(
+    (config: StickerConfig) => {
+      isRestoringState.current = true
 
-    characterHook.setCharacter(config.character)
-    textSettings.setText(config.text)
-    textSettings.setFontSize(config.fontSize)
-    textSettings.setFontKey(config.fontKey)
-    textSettings.setRotate(config.rotate)
-    textSettings.setSpaceSize(config.spaceSize)
-    textSettings.setLetterSpacing(config.letterSpacing)
-    textSettings.setCurve(config.curve)
-    textSettings.setVertical(config.vertical)
-    textSettings.setTextBehind(config.textBehind)
-    position.setPosition(config.position)
-    stroke.setStrokeWidth(config.strokeWidth)
-    stroke.setStrokeColor(config.strokeColor)
-    colorScheme.setTextColor(config.textColor)
+      characterHook.setCharacter(config.character)
+      textSettings.setText(config.text)
+      textSettings.setFontSize(config.fontSize)
+      textSettings.setFontKey(config.fontKey)
+      textSettings.setRotate(config.rotate)
+      textSettings.setSpaceSize(config.spaceSize)
+      textSettings.setLetterSpacing(config.letterSpacing)
+      textSettings.setCurve(config.curve)
+      textSettings.setVertical(config.vertical)
+      textSettings.setTextBehind(config.textBehind)
+      position.setPosition(config.position)
+      stroke.setStrokeWidth(config.strokeWidth)
+      stroke.setStrokeColor(config.strokeColor)
+      colorScheme.setTextColor(config.textColor)
 
-    setTimeout(() => {
-      isRestoringState.current = false
-    }, 100)
-  }, [characterHook, textSettings, position, stroke, colorScheme])
+      setTimeout(() => {
+        isRestoringState.current = false
+      }, 100)
+    },
+    [characterHook, textSettings, position, stroke, colorScheme]
+  )
 
   // Push current state to undo/redo stack when any setting changes (with debounce)
   useEffect(() => {
@@ -371,14 +384,22 @@ function App() {
     uiState,
   })
 
-
   return (
-    <ThemeWrapper dominantColor={colorScheme.dominantColor} backgroundColor={colorScheme.backgroundColor}>
+    <ThemeWrapper
+      dominantColor={colorScheme.dominantColor}
+      backgroundColor={colorScheme.backgroundColor}
+    >
       <Box sx={{ minHeight: '100vh', width: '100%', px: { xs: 1.5, sm: 3 }, py: 3 }}>
         <Grid container spacing={3}>
           {/* Header */}
           <Grid item xs={12}>
-            <Box display="flex" alignItems="center" justifyContent="space-between" flexWrap="wrap" gap={1}>
+            <Box
+              display="flex"
+              alignItems="center"
+              justifyContent="space-between"
+              flexWrap="wrap"
+              gap={1}
+            >
               <Typography
                 variant="h3"
                 component="h1"
@@ -388,7 +409,9 @@ function App() {
                   fontWeight: 'bold',
                   color: colorScheme.dominantColor,
                 }}
-              >Project Sekai 贴纸生成器</Typography>
+              >
+                Project Sekai 贴纸生成器
+              </Typography>
 
               {/* Mobile: Undo/Redo buttons */}
               <Box sx={{ display: { xs: 'flex', md: 'none' }, gap: 0.5 }}>
@@ -422,22 +445,14 @@ function App() {
               <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1 }}>
                 <Tooltip title="撤销 (Ctrl+Z)">
                   <span>
-                    <IconButton
-                      color="secondary"
-                      onClick={handleUndo}
-                      disabled={!undoRedo.canUndo}
-                    >
+                    <IconButton color="secondary" onClick={handleUndo} disabled={!undoRedo.canUndo}>
                       <Undo />
                     </IconButton>
                   </span>
                 </Tooltip>
                 <Tooltip title="重做 (Ctrl+Y)">
                   <span>
-                    <IconButton
-                      color="secondary"
-                      onClick={handleRedo}
-                      disabled={!undoRedo.canRedo}
-                    >
+                    <IconButton color="secondary" onClick={handleRedo} disabled={!undoRedo.canRedo}>
                       <Redo />
                     </IconButton>
                   </span>
@@ -513,9 +528,7 @@ function App() {
                     />
 
                     {/* Font loading overlay */}
-                    {!fontsReady && (
-                      <FontLoadingOverlay progress={fontProgress} />
-                    )}
+                    {!fontsReady && <FontLoadingOverlay progress={fontProgress} />}
                   </Box>
 
                   {/* Mobile: Horizontal slider */}
@@ -532,7 +545,12 @@ function App() {
                     <Box flex={1} display="flex" alignItems="center">
                       <Slider
                         value={position.position.x}
-                        onChange={(_, v) => position.setPosition({ ...position.position, x: Array.isArray(v) ? v[0] : v })}
+                        onChange={(_, v) =>
+                          position.setPosition({
+                            ...position.position,
+                            x: Array.isArray(v) ? v[0] : v,
+                          })
+                        }
                         min={0}
                         max={296}
                         color="secondary"
@@ -546,9 +564,18 @@ function App() {
                 </Box>
 
                 {/* Mobile: Right side vertical slider and Picker */}
-                <Box display="flex" flexDirection="column" sx={{ display: { xs: 'flex', md: 'none' } }}>
+                <Box
+                  display="flex"
+                  flexDirection="column"
+                  sx={{ display: { xs: 'flex', md: 'none' } }}
+                >
                   {/* Vertical slider - height matches Canvas */}
-                  <Box display="flex" flexDirection="column" alignItems="center" sx={{ height: '205px' }}>
+                  <Box
+                    display="flex"
+                    flexDirection="column"
+                    alignItems="center"
+                    sx={{ height: '205px' }}
+                  >
                     <IconButton size="small" onClick={() => position.moveY(-5)}>
                       <KeyboardArrowUp />
                     </IconButton>
@@ -556,7 +583,12 @@ function App() {
                       <Slider
                         orientation="vertical"
                         value={256 - position.position.y}
-                        onChange={(_, v) => position.setPosition({ ...position.position, y: 256 - (Array.isArray(v) ? v[0] : v) })}
+                        onChange={(_, v) =>
+                          position.setPosition({
+                            ...position.position,
+                            y: 256 - (Array.isArray(v) ? v[0] : v),
+                          })
+                        }
                         min={0}
                         max={256}
                         color="secondary"
@@ -569,8 +601,19 @@ function App() {
                   </Box>
 
                   {/* Picker button - aligns with horizontal slider */}
-                  <Box display="flex" alignItems="center" justifyContent="center" mt={1} sx={{ height: '50px' }}>
-                    <Picker setCharacter={handleCharacterSelect} color={colorScheme.dominantColor} />
+                  <Box
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    mt={1}
+                    sx={{ height: '50px' }}
+                  >
+                    <Picker
+                      setCharacter={handleCharacterSelect}
+                      color={colorScheme.dominantColor}
+                      disabled={!!characterHook.customImage}
+                      tooltip="请先清除自定义图片"
+                    />
                   </Box>
                 </Box>
               </Box>
@@ -579,18 +622,38 @@ function App() {
               <Box sx={{ display: { xs: 'none', md: 'block' } }}>
                 <Box display="flex" gap={1} mb={1} mt={2}>
                   <Box display="flex" gap={0.5} flex={1}>
-                    <Button size="small" onClick={() => position.moveX(-5)} fullWidth startIcon={<KeyboardArrowLeft />}>
+                    <Button
+                      size="small"
+                      onClick={() => position.moveX(-5)}
+                      fullWidth
+                      startIcon={<KeyboardArrowLeft />}
+                    >
                       X-5
                     </Button>
-                    <Button size="small" onClick={() => position.moveX(5)} fullWidth endIcon={<KeyboardArrowRight />}>
+                    <Button
+                      size="small"
+                      onClick={() => position.moveX(5)}
+                      fullWidth
+                      endIcon={<KeyboardArrowRight />}
+                    >
                       X+5
                     </Button>
                   </Box>
                   <Box display="flex" gap={0.5} flex={1}>
-                    <Button size="small" onClick={() => position.moveY(-5)} fullWidth startIcon={<KeyboardArrowUp />}>
+                    <Button
+                      size="small"
+                      onClick={() => position.moveY(-5)}
+                      fullWidth
+                      startIcon={<KeyboardArrowUp />}
+                    >
                       Y-5
                     </Button>
-                    <Button size="small" onClick={() => position.moveY(5)} fullWidth endIcon={<KeyboardArrowDown />}>
+                    <Button
+                      size="small"
+                      onClick={() => position.moveY(5)}
+                      fullWidth
+                      endIcon={<KeyboardArrowDown />}
+                    >
                       Y+5
                     </Button>
                   </Box>
@@ -601,7 +664,9 @@ function App() {
                 </Typography>
                 <Slider
                   value={position.position.x}
-                  onChange={(_, v) => position.setPosition({ ...position.position, x: Array.isArray(v) ? v[0] : v })}
+                  onChange={(_, v) =>
+                    position.setPosition({ ...position.position, x: Array.isArray(v) ? v[0] : v })
+                  }
                   min={0}
                   max={296}
                   color="secondary"
@@ -612,31 +677,57 @@ function App() {
                 </Typography>
                 <Slider
                   value={position.position.y}
-                  onChange={(_, v) => position.setPosition({ ...position.position, y: Array.isArray(v) ? v[0] : v })}
+                  onChange={(_, v) =>
+                    position.setPosition({ ...position.position, y: Array.isArray(v) ? v[0] : v })
+                  }
                   min={0}
                   max={256}
                   color="secondary"
                 />
               </Box>
             </Paper>
+
+            <Box mt={2} sx={{ display: { xs: 'none', md: 'block' } }}>
+              <ExportPanel
+                onCopy={handleCopy}
+                onCopyWithBg={handleCopyWithBg}
+                onDownload={handleDownload}
+                onDownloadJpg={handleDownloadJpg}
+                onDownloadWebp={handleDownloadWebp}
+                onUpload={() => uiState.setUploadOpen(true)}
+              />
+            </Box>
           </Grid>
 
           {/* Controls Section */}
           <Grid item xs={12} md={7}>
             <Paper elevation={3} sx={{ p: 2 }}>
               {/* Desktop: display Picker and character name */}
-              <Box display="flex" alignItems="center" gap={1} mb={2} sx={{ display: { xs: 'none', md: 'flex' } }}>
-                <Picker setCharacter={handleCharacterSelect} color={colorScheme.dominantColor} />
+              <Box
+                display="flex"
+                alignItems="center"
+                gap={1}
+                mb={2}
+                sx={{ display: { xs: 'none', md: 'flex' } }}
+              >
+                <Picker
+                  setCharacter={handleCharacterSelect}
+                  color={colorScheme.dominantColor}
+                  disabled={!!characterHook.customImage}
+                  tooltip="请先清除自定义图片"
+                />
                 <Typography
                   variant="subtitle1"
                   sx={{
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap',
-                    flex: 1
+                    flex: 1,
                   }}
                 >
-                  {characters[characterHook.character].name}
+                  {characterHook.customImage
+                    ? '自定义图片'
+                    : characters[characterHook.character].name}
                 </Typography>
               </Box>
 
@@ -707,7 +798,7 @@ function App() {
           </Grid>
 
           {/* Export Section */}
-          <Grid item xs={12}>
+          <Grid item xs={12} sx={{ display: { xs: 'block', md: 'none' } }}>
             <ExportPanel
               onCopy={handleCopy}
               onCopyWithBg={handleCopyWithBg}
@@ -858,10 +949,7 @@ function App() {
       </Suspense>
 
       {/* Reset Confirmation Dialog */}
-      <Dialog
-        open={uiState.resetConfirmOpen}
-        onClose={() => uiState.setResetConfirmOpen(false)}
-      >
+      <Dialog open={uiState.resetConfirmOpen} onClose={() => uiState.setResetConfirmOpen(false)}>
         <DialogTitle>确认重置</DialogTitle>
         <DialogContent>
           <Typography>
@@ -869,9 +957,7 @@ function App() {
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => uiState.setResetConfirmOpen(false)}>
-            取消
-          </Button>
+          <Button onClick={() => uiState.setResetConfirmOpen(false)}>取消</Button>
           <Button
             onClick={() => {
               resetSettings()
