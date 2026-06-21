@@ -2,11 +2,7 @@
 // Copyright (C) 2026 The 25-ji-code-de Team
 
 import { Grid, Button, Typography, Paper } from '@mui/material'
-import {
-  ContentCopyTwoTone,
-  DownloadTwoTone,
-  CloudUpload,
-} from '@mui/icons-material'
+import { ContentCopyTwoTone, DownloadTwoTone, CloudUpload } from '@mui/icons-material'
 
 interface ExportPanelProps {
   onCopy: () => void
@@ -34,7 +30,7 @@ export default function ExportPanel({
         导出选项
       </Typography>
       <Grid container spacing={1}>
-        <Grid item xs={6} sm={4} md={2}>
+        <Grid item xs={6} sm={4} md={6}>
           <Button
             variant="contained"
             color="secondary"
@@ -45,7 +41,7 @@ export default function ExportPanel({
             复制 PNG
           </Button>
         </Grid>
-        <Grid item xs={6} sm={4} md={2}>
+        <Grid item xs={6} sm={4} md={6}>
           <Button
             variant="contained"
             color="secondary"
@@ -56,7 +52,7 @@ export default function ExportPanel({
             复制 JPG
           </Button>
         </Grid>
-        <Grid item xs={6} sm={4} md={2}>
+        <Grid item xs={6} sm={4} md={6}>
           <Button
             variant="contained"
             color="secondary"
@@ -67,7 +63,7 @@ export default function ExportPanel({
             保存 PNG
           </Button>
         </Grid>
-        <Grid item xs={6} sm={4} md={2}>
+        <Grid item xs={6} sm={4} md={6}>
           <Button
             variant="contained"
             color="secondary"
@@ -78,7 +74,7 @@ export default function ExportPanel({
             保存 JPG
           </Button>
         </Grid>
-        <Grid item xs={6} sm={4} md={2}>
+        <Grid item xs={6} sm={4} md={6}>
           <Button
             variant="contained"
             color="secondary"
@@ -89,7 +85,7 @@ export default function ExportPanel({
             保存 WEBP
           </Button>
         </Grid>
-        <Grid item xs={6} sm={4} md={2}>
+        <Grid item xs={6} sm={4} md={6}>
           <Button
             variant="contained"
             color="primary"
