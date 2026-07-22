@@ -29,14 +29,14 @@ import {
   HelpOutline,
   Explore,
 } from '@mui/icons-material'
-import { useCallback, useEffect, useRef, lazy, Suspense } from 'react'
+import { useCallback, useEffect, useRef, useState, lazy, Suspense } from 'react'
 import characters from './characters.json'
 import Canvas from './components/Canvas'
 import Picker from './components/Picker'
 import ThemeWrapper from './components/ThemeWrapper'
 import NotificationSnackbar from './components/controls/NotificationSnackbar'
 import TextStylePanel from './components/sections/TextStylePanel'
-import ExportPanel from './components/sections/ExportPanel'
+import ExportPanel, { ExportScale } from './components/sections/ExportPanel'
 import LoginButton from './components/auth/LoginButton'
 import UserMenu from './components/auth/UserMenu'
 
@@ -93,13 +93,23 @@ function App() {
   const stroke = useStroke()
   const canvasDrawing = useCanvasDrawing()
 
+  // Export settings (scale / quality / compress) — default matches previous behaviour
+  const [exportScale, setExportScale] = useState<ExportScale>(1)
+  const [exportQuality, setExportQuality] = useState(92)
+  const [exportCompress, setExportCompress] = useState(true)
+
   const exportHooks = useExport(
     canvasRef,
     characterHook.character,
     characterHook.customImage,
     textSettings.text,
     uiState.setCopyPopupOpen,
-    uiState.setDownloadPopupOpen
+    uiState.setDownloadPopupOpen,
+    {
+      scale: exportScale,
+      quality: exportQuality / 100,
+      compress: exportCompress,
+    }
   )
 
   const history = useHistory()
@@ -695,6 +705,12 @@ function App() {
                 onDownloadJpg={handleDownloadJpg}
                 onDownloadWebp={handleDownloadWebp}
                 onUpload={() => uiState.setUploadOpen(true)}
+                scale={exportScale}
+                onScaleChange={setExportScale}
+                quality={exportQuality}
+                onQualityChange={setExportQuality}
+                compress={exportCompress}
+                onCompressChange={setExportCompress}
               />
             </Box>
           </Grid>
@@ -806,6 +822,12 @@ function App() {
               onDownloadJpg={handleDownloadJpg}
               onDownloadWebp={handleDownloadWebp}
               onUpload={() => uiState.setUploadOpen(true)}
+              scale={exportScale}
+              onScaleChange={setExportScale}
+              quality={exportQuality}
+              onQualityChange={setExportQuality}
+              compress={exportCompress}
+              onCompressChange={setExportCompress}
             />
           </Grid>
         </Grid>
@@ -945,6 +967,7 @@ function App() {
           onUploadSuccess={(url) => saveToHistory(url)}
           characterId={characterHook.character}
           customImage={characterHook.customImage}
+          exportScale={exportScale}
         />
       </Suspense>
 
