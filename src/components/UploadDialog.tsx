@@ -18,6 +18,7 @@ import {
 import { Close, ContentCopy, CloudUpload } from '@mui/icons-material'
 import { useState, useEffect } from 'react'
 import GallerySubmitForm from './GallerySubmitForm'
+import { cropCanvasToContent } from '../utils/cropCanvas'
 
 interface UploadDialogProps {
   open: boolean
@@ -52,9 +53,10 @@ function UploadDialog({ open, onClose, canvas, altText = '', onUploadSuccess, ch
     setUploadProgress(0)
 
     try {
-      // 将 canvas 转换为 Blob
+      // 导出前按内容边界裁剪，避免非 1:1 自定义图带上透明填充
+      const exportCanvas = cropCanvasToContent(canvas)
       const blob = await new Promise<Blob | null>((resolve) => {
-        canvas.toBlob(resolve, 'image/png')
+        exportCanvas.toBlob(resolve, 'image/png')
       })
 
       if (!blob) {
