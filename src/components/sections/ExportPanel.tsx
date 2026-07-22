@@ -150,7 +150,7 @@ export default function ExportPanel({
           <ToggleButton value={3}>3×</ToggleButton>
         </ToggleButtonGroup>
         <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
-          基于当前预览内容放大导出；不会提升底图本身的清晰度
+          按倍率重新绘制导出（文字/描边更清晰）；角色底图仍受素材分辨率限制
         </Typography>
       </Box>
 

@@ -18,7 +18,7 @@ import {
 import { Close, ContentCopy, CloudUpload } from '@mui/icons-material'
 import { useState, useEffect } from 'react'
 import GallerySubmitForm from './GallerySubmitForm'
-import { prepareExportCanvas } from '../utils/cropCanvas'
+import { cropCanvasToContent } from '../utils/cropCanvas'
 
 interface UploadDialogProps {
   open: boolean
@@ -30,6 +30,11 @@ interface UploadDialogProps {
   customImage?: string | null
   /** Export scale multiplier (1 / 2 / 3), same as export panel */
   exportScale?: number
+  /**
+   * Hi-DPI re-render (text stays sharp). Falls back to preview canvas + crop
+   * when not provided.
+   */
+  renderAtScale?: (scale: number) => HTMLCanvasElement | null
 }
 
 function UploadDialog({
@@ -41,6 +46,7 @@ function UploadDialog({
   characterId,
   customImage,
   exportScale = 1,
+  renderAtScale,
 }: UploadDialogProps) {
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
@@ -57,15 +63,17 @@ function UploadDialog({
   }, [open])
 
   const uploadToStorage = async () => {
-    if (!canvas) return
-
     setUploading(true)
     setError('')
     setUploadProgress(0)
 
     try {
-      // 裁剪透明边 + 按导出倍率缩放（与导出面板一致）
-      const exportCanvas = prepareExportCanvas(canvas, exportScale)
+      // 按倍率离屏重绘（文字清晰）再裁透明边；失败则回退预览画布
+      const rendered = renderAtScale?.(exportScale) ?? canvas
+      if (!rendered) {
+        throw new Error('无法生成图片')
+      }
+      const exportCanvas = cropCanvasToContent(rendered)
       const blob = await new Promise<Blob | null>((resolve) => {
         exportCanvas.toBlob(resolve, 'image/png')
       })

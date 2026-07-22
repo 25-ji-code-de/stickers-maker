@@ -11,6 +11,13 @@ const FONT_STACKS: Record<FontKey, string> = {
     "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
 }
 
+/** Logical (CSS) size of the sticker canvas at 1× */
+export const CANVAS_WIDTH = 296
+export const CANVAS_HEIGHT = 256
+
+/** Magic offset used in vertical line step: fontSize + spaceSize - VERTICAL_LINE_GAP */
+const VERTICAL_LINE_GAP = 40
+
 interface TextSettings {
   fontSize: number
   fontKey: FontKey
@@ -30,7 +37,9 @@ interface Stroke {
 }
 
 /**
- * Hook that encapsulates all canvas drawing logic
+ * Hook that encapsulates all canvas drawing logic.
+ * Pass `scale` > 1 for high-DPI export: layout is multiplied so text/strokes
+ * are re-rasterized at higher resolution instead of upscaling a bitmap.
  */
 export function useCanvasDrawing() {
   const drawText = useCallback(
@@ -42,7 +51,9 @@ export function useCanvasDrawing() {
       textSettings: TextSettings,
       colors: Colors,
       stroke: Stroke,
-      angle: number
+      angle: number,
+      /** Scale factor applied to the fixed vertical line-gap constant */
+      scale: number = 1
     ): void => {
       const { fontSize, fontKey, spaceSize, letterSpacing, curve, vertical } = textSettings
       const { textColor } = colors
@@ -72,7 +83,7 @@ export function useCanvasDrawing() {
         }
       } else if (vertical) {
         const letterStep = fontSize + letterSpacing
-        const lineStep = fontSize + spaceSize - 40
+        const lineStep = fontSize + spaceSize - VERTICAL_LINE_GAP * scale
         let xOffset = 0
         for (const line of lines) {
           let yOffset = 0
@@ -123,10 +134,16 @@ export function useCanvasDrawing() {
       textSettings: TextSettings,
       colors: Colors,
       stroke: Stroke,
-      textBehind: boolean
+      textBehind: boolean,
+      /**
+       * Pixel scale for export (1 = preview size).
+       * Text / stroke / positions are re-drawn at this density — not bitmap-upscaled.
+       */
+      scale: number = 1
     ): void => {
-      const w = 296
-      const h = 256
+      const s = Number.isFinite(scale) && scale > 0 ? scale : 1
+      const w = Math.round(CANVAS_WIDTH * s)
+      const h = Math.round(CANVAS_HEIGHT * s)
       if (ctx.canvas.width !== w) ctx.canvas.width = w
       if (ctx.canvas.height !== h) ctx.canvas.height = h
 
@@ -143,10 +160,37 @@ export function useCanvasDrawing() {
 
         const angle = (Math.PI * text.length) / 7
 
-        if (textBehind) {
-          drawText(ctx, text, position, rotate, textSettings, colors, stroke, angle)
+        // Scale layout so geometry matches 1× preview, at higher pixel density
+        const scaledPosition = { x: position.x * s, y: position.y * s }
+        const scaledTextSettings: TextSettings = {
+          ...textSettings,
+          fontSize: textSettings.fontSize * s,
+          spaceSize: textSettings.spaceSize * s,
+          letterSpacing: textSettings.letterSpacing * s,
+        }
+        const scaledStroke: Stroke = {
+          strokeWidth: stroke.strokeWidth * s,
+          strokeColor: stroke.strokeColor,
         }
 
+        if (textBehind) {
+          drawText(
+            ctx,
+            text,
+            scaledPosition,
+            rotate,
+            scaledTextSettings,
+            colors,
+            scaledStroke,
+            angle,
+            s
+          )
+        }
+
+        // drawImage uses full source pixels; if the asset is low-res it still
+        // cannot invent detail, but text below is re-rasterized sharply.
+        ctx.imageSmoothingEnabled = true
+        ctx.imageSmoothingQuality = 'high'
         ctx.drawImage(
           img,
           0,
@@ -160,7 +204,17 @@ export function useCanvasDrawing() {
         )
 
         if (!textBehind) {
-          drawText(ctx, text, position, rotate, textSettings, colors, stroke, angle)
+          drawText(
+            ctx,
+            text,
+            scaledPosition,
+            rotate,
+            scaledTextSettings,
+            colors,
+            scaledStroke,
+            angle,
+            s
+          )
         }
       } else {
         // 空状态 - 显示渐变背景
