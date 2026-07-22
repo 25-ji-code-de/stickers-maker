@@ -3,17 +3,31 @@
 
 import { useCallback, RefObject } from 'react'
 import { b64toBlob } from '../utils/imageConversion'
-import { canvasWithWhiteBackground, cropCanvasToContent } from '../utils/cropCanvas'
+import {
+  canvasWithWhiteBackground,
+  prepareExportCanvas,
+} from '../utils/cropCanvas'
 import characters from '../characters.json'
 import { Character, ExportHooks } from '../types'
 
 const { ClipboardItem } = window
 const typedCharacters = characters as Character[]
 
+export interface ExportSettings {
+  /** Export pixel scale relative to the cropped preview canvas (1 / 2 / 3). */
+  scale: number
+  /**
+   * Lossy quality 0–1 for JPG / WEBP.
+   * PNG exports ignore this (always lossless).
+   */
+  quality: number
+  /** When false, lossy formats use quality 1 (maximum). */
+  compress: boolean
+}
+
 /**
  * Hook that handles all export/download/copy operations.
- * Exports are auto-cropped to non-transparent content so custom non-1:1
- * images do not keep empty transparent padding from the fixed canvas.
+ * Exports are auto-cropped to non-transparent content, then optionally scaled.
  */
 export function useExport(
   canvasRef: RefObject<HTMLCanvasElement>,
@@ -21,8 +35,11 @@ export function useExport(
   customImage: string | null,
   text: string,
   setCopyPopupOpen: (open: boolean) => void,
-  setDownloadPopupOpen: (open: boolean) => void
+  setDownloadPopupOpen: (open: boolean) => void,
+  exportSettings: ExportSettings
 ): ExportHooks {
+  const { scale, quality, compress } = exportSettings
+
   const generateFileName = useCallback(
     (ext: string): string => {
       // Remove spaces and illegal characters
@@ -40,12 +57,14 @@ export function useExport(
     [character, text, customImage]
   )
 
-  /** Preview canvas stays 296×256; export uses content bounds only. */
+  /** Preview canvas stays 296×256; export uses content bounds + scale. */
   const getExportCanvas = useCallback((): HTMLCanvasElement | null => {
     const canvas = canvasRef.current
     if (!canvas) return null
-    return cropCanvasToContent(canvas)
-  }, [canvasRef])
+    return prepareExportCanvas(canvas, scale)
+  }, [canvasRef, scale])
+
+  const lossyQuality = compress ? Math.min(1, Math.max(0.1, quality)) : 1
 
   const download = useCallback(async (): Promise<void> => {
     const exportCanvas = getExportCanvas()
@@ -62,10 +81,10 @@ export function useExport(
     if (!exportCanvas) return
     const link = document.createElement('a')
     link.download = generateFileName('webp')
-    link.href = exportCanvas.toDataURL('image/webp')
+    link.href = exportCanvas.toDataURL('image/webp', lossyQuality)
     link.click()
     setDownloadPopupOpen(true)
-  }, [getExportCanvas, generateFileName, setDownloadPopupOpen])
+  }, [getExportCanvas, generateFileName, setDownloadPopupOpen, lossyQuality])
 
   const downloadJpg = useCallback(async (): Promise<void> => {
     const exportCanvas = getExportCanvas()
@@ -73,10 +92,10 @@ export function useExport(
     const withBg = canvasWithWhiteBackground(exportCanvas)
     const link = document.createElement('a')
     link.download = generateFileName('jpg')
-    link.href = withBg.toDataURL('image/jpeg')
+    link.href = withBg.toDataURL('image/jpeg', lossyQuality)
     link.click()
     setDownloadPopupOpen(true)
-  }, [getExportCanvas, generateFileName, setDownloadPopupOpen])
+  }, [getExportCanvas, generateFileName, setDownloadPopupOpen, lossyQuality])
 
   const copy = useCallback(async (): Promise<void> => {
     const exportCanvas = getExportCanvas()
@@ -93,7 +112,7 @@ export function useExport(
     const exportCanvas = getExportCanvas()
     if (!exportCanvas) return
     const withBg = canvasWithWhiteBackground(exportCanvas)
-    // Clipboard paste for JPEG path still uses PNG container for broader support,
+    // Clipboard paste still uses PNG container for broader support,
     // with opaque white background baked in.
     await navigator.clipboard.write([
       new ClipboardItem({
