@@ -98,6 +98,54 @@ function App() {
   const [exportQuality, setExportQuality] = useState(92)
   const [exportCompress, setExportCompress] = useState(true)
 
+  /**
+   * Re-draw the sticker onto an offscreen canvas at `scale`× pixel density.
+   * Text/stroke are re-rasterized (sharp); character art uses full source pixels
+   * but cannot invent detail beyond the asset resolution.
+   */
+  const renderAtScale = useCallback(
+    (scale: number): HTMLCanvasElement | null => {
+      const offscreen = document.createElement('canvas')
+      const ctx = offscreen.getContext('2d')
+      if (!ctx) return null
+      canvasDrawing.draw(
+        ctx,
+        characterHook.imgObj,
+        characterHook.loaded,
+        textSettings.text,
+        position.position,
+        textSettings.rotate,
+        {
+          fontSize: textSettings.fontSize,
+          fontKey: textSettings.fontKey,
+          spaceSize: textSettings.spaceSize,
+          letterSpacing: textSettings.letterSpacing,
+          curve: textSettings.curve,
+          vertical: textSettings.vertical,
+        },
+        {
+          textColor: colorScheme.textColor,
+        },
+        {
+          strokeWidth: stroke.strokeWidth,
+          strokeColor: stroke.strokeColor,
+        },
+        textSettings.textBehind,
+        scale
+      )
+      return offscreen
+    },
+    [
+      canvasDrawing,
+      characterHook.imgObj,
+      characterHook.loaded,
+      textSettings,
+      position.position,
+      colorScheme.textColor,
+      stroke,
+    ]
+  )
+
   const exportHooks = useExport(
     canvasRef,
     characterHook.character,
@@ -109,7 +157,8 @@ function App() {
       scale: exportScale,
       quality: exportQuality / 100,
       compress: exportCompress,
-    }
+    },
+    renderAtScale
   )
 
   const history = useHistory()
@@ -968,6 +1017,7 @@ function App() {
           characterId={characterHook.character}
           customImage={characterHook.customImage}
           exportScale={exportScale}
+          renderAtScale={renderAtScale}
         />
       </Suspense>
 

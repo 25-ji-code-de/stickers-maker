@@ -108,33 +108,3 @@ export function canvasWithWhiteBackground(source: HTMLCanvasElement): HTMLCanvas
   return out
 }
 
-/**
- * Scale a canvas by an integer/float factor using high-quality smoothing.
- * scale <= 1 returns the same canvas reference (no copy) for the common 1x path.
- */
-export function scaleCanvas(source: HTMLCanvasElement, scale: number): HTMLCanvasElement {
-  if (!Number.isFinite(scale) || scale <= 0 || scale === 1) {
-    return source
-  }
-
-  const out = document.createElement('canvas')
-  out.width = Math.max(1, Math.round(source.width * scale))
-  out.height = Math.max(1, Math.round(source.height * scale))
-  const ctx = out.getContext('2d')
-  if (ctx) {
-    ctx.imageSmoothingEnabled = true
-    ctx.imageSmoothingQuality = 'high'
-    ctx.drawImage(source, 0, 0, out.width, out.height)
-  }
-  return out
-}
-
-/**
- * Crop transparent padding then optionally scale for export.
- */
-export function prepareExportCanvas(
-  source: HTMLCanvasElement,
-  scale: number = 1
-): HTMLCanvasElement {
-  return scaleCanvas(cropCanvasToContent(source), scale)
-}

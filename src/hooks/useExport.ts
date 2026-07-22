@@ -5,7 +5,7 @@ import { useCallback, RefObject } from 'react'
 import { b64toBlob } from '../utils/imageConversion'
 import {
   canvasWithWhiteBackground,
-  prepareExportCanvas,
+  cropCanvasToContent,
 } from '../utils/cropCanvas'
 import characters from '../characters.json'
 import { Character, ExportHooks } from '../types'
@@ -14,7 +14,11 @@ const { ClipboardItem } = window
 const typedCharacters = characters as Character[]
 
 export interface ExportSettings {
-  /** Export pixel scale relative to the cropped preview canvas (1 / 2 / 3). */
+  /**
+   * Export pixel scale (1 / 2 / 3).
+   * Re-renders the sticker at this density (text stays sharp);
+   * does not invent detail for low-res character art.
+   */
   scale: number
   /**
    * Lossy quality 0–1 for JPG / WEBP.
@@ -26,8 +30,14 @@ export interface ExportSettings {
 }
 
 /**
+ * Renders the current sticker onto a canvas at the given scale.
+ * Used for hi-DPI export instead of bitmap-upscaling the preview.
+ */
+export type RenderAtScale = (scale: number) => HTMLCanvasElement | null
+
+/**
  * Hook that handles all export/download/copy operations.
- * Exports are auto-cropped to non-transparent content, then optionally scaled.
+ * Exports are re-drawn at the chosen scale, then auto-cropped.
  */
 export function useExport(
   canvasRef: RefObject<HTMLCanvasElement>,
@@ -36,7 +46,8 @@ export function useExport(
   text: string,
   setCopyPopupOpen: (open: boolean) => void,
   setDownloadPopupOpen: (open: boolean) => void,
-  exportSettings: ExportSettings
+  exportSettings: ExportSettings,
+  renderAtScale: RenderAtScale
 ): ExportHooks {
   const { scale, quality, compress } = exportSettings
 
@@ -57,12 +68,20 @@ export function useExport(
     [character, text, customImage]
   )
 
-  /** Preview canvas stays 296×256; export uses content bounds + scale. */
+  /**
+   * Hi-DPI path: re-draw at scale then crop transparent padding.
+   * 1× still re-draws via renderAtScale so crop is consistent;
+   * falls back to preview canvas if render fails.
+   */
   const getExportCanvas = useCallback((): HTMLCanvasElement | null => {
+    const rendered = renderAtScale(scale)
+    if (rendered) {
+      return cropCanvasToContent(rendered)
+    }
     const canvas = canvasRef.current
     if (!canvas) return null
-    return prepareExportCanvas(canvas, scale)
-  }, [canvasRef, scale])
+    return cropCanvasToContent(canvas)
+  }, [canvasRef, scale, renderAtScale])
 
   const lossyQuality = compress ? Math.min(1, Math.max(0.1, quality)) : 1
 
