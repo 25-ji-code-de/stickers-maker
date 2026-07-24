@@ -3,11 +3,15 @@
 
 /**
  * OAuth 2.1 + OIDC Authentication Service
+ *
+ * Aligned with hub / 25ji client conventions:
+ * - sessionStorage for PKCE (via storage.service)
+ * - single-flight refresh
+ * - refresh 5 minutes before expiry
  */
 
 import { AuthUser, AuthState, TokenResponse, OIDCUserInfo } from '../types'
 import { generateCodeVerifier, generateCodeChallenge, generateState } from '../utils/crypto.utils'
-import { parseJWT, isTokenExpired } from '../utils/jwt.utils'
 import {
   saveAuthState,
   loadAuthState,
@@ -26,6 +30,9 @@ import {
 const CLIENT_ID = import.meta.env.VITE_OAUTH_CLIENT_ID || ''
 const REDIRECT_URI = import.meta.env.VITE_OAUTH_REDIRECT_URI || `${window.location.origin}/callback`
 const SCOPE = import.meta.env.VITE_OAUTH_SCOPE || 'openid profile email'
+
+/** Coalesce concurrent refreshAccessToken / getCurrentAuth refresh paths */
+let refreshPromise: Promise<AuthState> | null = null
 
 /**
  * Start OAuth login flow
@@ -110,7 +117,8 @@ export async function handleCallback(code: string, state: string): Promise<AuthS
     const user = await fetchUserInfo(tokens.access_token)
 
     // Calculate expiration time
-    const expiresAt = Date.now() + tokens.expires_in * 1000
+    const expiresIn = Number(tokens.expires_in) || 3600
+    const expiresAt = Date.now() + expiresIn * 1000
 
     // Create and save auth state
     const authState: AuthState = {
@@ -139,7 +147,7 @@ async function fetchUserInfo(accessToken: string): Promise<AuthUser> {
     const userinfoEndpoint = await getUserInfoEndpoint()
     const response = await fetch(userinfoEndpoint, {
       headers: {
-        'Authorization': `Bearer ${accessToken}`,
+        Authorization: `Bearer ${accessToken}`,
       },
     })
 
@@ -162,12 +170,22 @@ async function fetchUserInfo(accessToken: string): Promise<AuthUser> {
 }
 
 /**
- * Refresh access token using refresh token
+ * Refresh access token using refresh token (single-flight)
  * @param refreshToken - Refresh token
  * @returns New auth state
  * @throws Error if refresh fails
  */
 export async function refreshAccessToken(refreshToken: string): Promise<AuthState> {
+  if (refreshPromise) {
+    return refreshPromise
+  }
+  refreshPromise = doRefreshAccessToken(refreshToken).finally(() => {
+    refreshPromise = null
+  })
+  return refreshPromise
+}
+
+async function doRefreshAccessToken(refreshToken: string): Promise<AuthState> {
   try {
     const tokenEndpoint = await getTokenEndpoint()
     const response = await fetch(tokenEndpoint, {
@@ -192,7 +210,8 @@ export async function refreshAccessToken(refreshToken: string): Promise<AuthStat
     const user = await fetchUserInfo(tokens.access_token)
 
     // Calculate new expiration time
-    const expiresAt = Date.now() + tokens.expires_in * 1000
+    const expiresIn = Number(tokens.expires_in) || 3600
+    const expiresAt = Date.now() + expiresIn * 1000
 
     // Create and save new auth state
     const authState: AuthState = {
@@ -214,15 +233,39 @@ export async function refreshAccessToken(refreshToken: string): Promise<AuthStat
 }
 
 /**
- * Logout and clear auth state
+ * Logout and clear auth state (best-effort server revoke)
  */
 export function logout(): void {
+  const authState = loadAuthState()
+  if (authState) {
+    const revoke = async (token: string | undefined, hint: string) => {
+      if (!token) return
+      try {
+        const tokenEndpoint = await getTokenEndpoint()
+        const revokeUrl = tokenEndpoint.replace(/\/token$/, '/revoke')
+        void fetch(revokeUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({
+            token,
+            token_type_hint: hint,
+            client_id: CLIENT_ID,
+          }),
+          keepalive: true,
+        }).catch(() => {})
+      } catch {
+        /* ignore */
+      }
+    }
+    void revoke(authState.refreshToken, 'refresh_token')
+    void revoke(authState.accessToken, 'access_token')
+  }
   clearAuthState()
 }
 
 /**
  * Get current auth state
- * Automatically refreshes if expired and refresh token is available
+ * Automatically refreshes if expired/expiring soon and refresh token is available
  * @returns Current auth state or null if not authenticated
  */
 export async function getCurrentAuth(): Promise<AuthState | null> {
@@ -232,22 +275,19 @@ export async function getCurrentAuth(): Promise<AuthState | null> {
     return null
   }
 
-  // Check if token is expired
-  const isExpired = Date.now() >= authState.expiresAt
+  // Refresh if expired or within 5 minutes of expiry (ecosystem convention)
+  const needsRefresh = Date.now() >= authState.expiresAt - 5 * 60 * 1000
 
-  if (isExpired && authState.refreshToken) {
+  if (needsRefresh && authState.refreshToken) {
     try {
-      // Try to refresh
       return await refreshAccessToken(authState.refreshToken)
     } catch {
-      // Refresh failed, clear state
       clearAuthState()
       return null
     }
   }
 
-  if (isExpired) {
-    // No refresh token, clear state
+  if (needsRefresh) {
     clearAuthState()
     return null
   }

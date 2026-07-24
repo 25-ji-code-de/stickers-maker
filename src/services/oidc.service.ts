@@ -11,6 +11,8 @@ const ISSUER = import.meta.env.VITE_OAUTH_ISSUER || 'https://id.nightcord.de5.ne
 const WELL_KNOWN_PATH = '/.well-known/openid-configuration'
 
 let cachedConfig: OIDCConfig | null = null
+/** Single-flight in-flight discovery (aligns with ecosystem refresh pattern) */
+let inflight: Promise<OIDCConfig> | null = null
 
 /**
  * Fetch OIDC configuration from .well-known endpoint
@@ -18,35 +20,40 @@ let cachedConfig: OIDCConfig | null = null
  * @throws Error if fetch fails
  */
 export async function fetchOIDCConfig(): Promise<OIDCConfig> {
-  // Return cached config if available
   if (cachedConfig) {
     return cachedConfig
   }
-
-  try {
-    const url = `${ISSUER}${WELL_KNOWN_PATH}`
-    const response = await fetch(url)
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch OIDC config: ${response.statusText}`)
-    }
-
-    const config: OIDCConfig = await response.json()
-
-    // Validate required fields
-    if (!config.authorization_endpoint || !config.token_endpoint || !config.userinfo_endpoint) {
-      throw new Error('Invalid OIDC configuration: missing required endpoints')
-    }
-
-    // Cache the config
-    cachedConfig = config
-
-    return config
-  } catch (err) {
-    throw new Error(
-      `OIDC discovery failed: ${err instanceof Error ? err.message : 'Unknown error'}`
-    )
+  if (inflight) {
+    return inflight
   }
+
+  inflight = (async () => {
+    try {
+      const url = `${ISSUER}${WELL_KNOWN_PATH}`
+      const response = await fetch(url)
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch OIDC config: ${response.statusText}`)
+      }
+
+      const config: OIDCConfig = await response.json()
+
+      if (!config.authorization_endpoint || !config.token_endpoint || !config.userinfo_endpoint) {
+        throw new Error('Invalid OIDC configuration: missing required endpoints')
+      }
+
+      cachedConfig = config
+      return config
+    } catch (err) {
+      throw new Error(
+        `OIDC discovery failed: ${err instanceof Error ? err.message : 'Unknown error'}`,
+      )
+    } finally {
+      inflight = null
+    }
+  })()
+
+  return inflight
 }
 
 /**
@@ -71,4 +78,12 @@ export async function getTokenEndpoint(): Promise<string> {
 export async function getUserInfoEndpoint(): Promise<string> {
   const config = await fetchOIDCConfig()
   return config.userinfo_endpoint
+}
+
+/**
+ * Clear discovery cache (tests / issuer rotation).
+ */
+export function clearOIDCCache(): void {
+  cachedConfig = null
+  inflight = null
 }

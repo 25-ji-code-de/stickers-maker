@@ -38,14 +38,18 @@ export function generateState(): string {
 }
 
 /**
- * Encode Uint8Array to Base64URL format
+ * Encode Uint8Array to Base64URL format (chunked — avoids apply arg limits)
  * @param buffer - The buffer to encode
  * @returns Base64URL-encoded string
  */
 function base64URLEncode(buffer: Uint8Array): string {
-  const base64 = btoa(String.fromCharCode(...buffer))
-  return base64
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=/g, '')
+  let binary = ''
+  const chunk = 0x8000
+  for (let i = 0; i < buffer.length; i += chunk) {
+    binary += String.fromCharCode.apply(
+      null,
+      buffer.subarray(i, i + chunk) as unknown as number[],
+    )
+  }
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')
 }
