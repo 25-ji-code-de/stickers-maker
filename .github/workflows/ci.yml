@@ -3,8 +3,8 @@ name: CI
 on:
   push:
     branches: [main, master]
+  # 不限定 base 分支 —— 栈式 PR（base 指向另一个特性分支）也应该跑 CI
   pull_request:
-    branches: [main, master]
 
 jobs:
   build:
