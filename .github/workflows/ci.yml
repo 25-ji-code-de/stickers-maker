@@ -19,3 +19,9 @@ jobs:
         run: npm ci || npm install
       - name: Build
         run: npm run build
+      - name: Typecheck
+        run: npm run type-check
+      - name: Lint
+        run: npm run lint
+      - name: Test
+        run: npm test
