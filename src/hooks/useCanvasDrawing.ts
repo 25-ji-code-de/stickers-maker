@@ -71,7 +71,7 @@ export function useCanvasDrawing() {
       const lines = text.split('\n')
 
       if (curve) {
-        for (let line of lines) {
+        for (const line of lines) {
           for (let i = 0; i < line.length; i++) {
             ctx.rotate(angle / line.length / 2.5)
             ctx.save()

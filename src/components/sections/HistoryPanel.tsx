@@ -64,7 +64,6 @@ export default function HistoryPanel({
 
   const theme = useTheme()
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'))
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
   // Apply filters and sorting
   const filteredItems = useMemo(

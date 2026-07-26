@@ -54,7 +54,7 @@ export function useExport(
   const generateFileName = useCallback(
     (ext: string): string => {
       // Remove spaces and illegal characters
-      const sanitize = (str: string): string => str.replace(/[\s\/\\:*?"<>|]/g, '')
+      const sanitize = (str: string): string => str.replace(/[\s/\\:*?"<>|]/g, '')
 
       const characterName = customImage ? '自定义角色' : sanitize(typedCharacters[character].name)
 

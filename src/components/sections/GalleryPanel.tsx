@@ -218,9 +218,9 @@ export default function GalleryPanel() {
           </Typography>
           <Typography variant="body2" component="div">
             1️⃣ 创建你的贴纸并调整样式<br/>
-            2️⃣ 点击"上传"按钮，将作品上传到服务器<br/>
-            3️⃣ 打开"历史记录"，找到已上传的作品<br/>
-            4️⃣ 点击作品查看详情，点击"提交到画廊"按钮<br/>
+            2️⃣ 点击“上传”按钮，将作品上传到服务器<br/>
+            3️⃣ 打开“历史记录”，找到已上传的作品<br/>
+            4️⃣ 点击作品查看详情，点击“提交到画廊”按钮<br/>
             5️⃣ 填写标题和标签，提交即可分享给大家！
           </Typography>
         </Alert>
@@ -252,7 +252,7 @@ export default function GalleryPanel() {
       <Alert severity="info" sx={{ mb: 2 }}>
         <Typography variant="body2">
           💡 <strong>如何分享作品：</strong>
-          创建贴纸 → 上传到服务器 → 打开历史记录 → 点击已上传作品 → 点击"提交到画廊"按钮
+          创建贴纸 → 上传到服务器 → 打开历史记录 → 点击已上传作品 → 点击“提交到画廊”按钮
         </Typography>
       </Alert>
 

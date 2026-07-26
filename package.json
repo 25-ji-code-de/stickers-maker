@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
+    "lint": "eslint . --ext js,jsx,ts,tsx --report-unused-disable-directives",
+    "type-check": "tsc --noEmit",
     "preview": "vite preview",
     "format": "prettier --write ."
   },
@@ -27,6 +28,8 @@
     "@types/node": "^25.3.0",
     "@types/react": "^18.2.55",
     "@types/react-dom": "^18.2.19",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
     "@vitejs/plugin-react-swc": "^4.2.2",
     "eslint": "^8.56.0",
     "eslint-plugin-react": "^7.33.2",

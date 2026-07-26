@@ -47,7 +47,7 @@ export default function LoginButton({
   // Regular button variant (for mobile/full width)
   return (
     <Button
-      variant={variant === 'icon' ? 'outlined' : variant}
+      variant={variant}
       size={size}
       fullWidth={fullWidth}
       color="secondary"

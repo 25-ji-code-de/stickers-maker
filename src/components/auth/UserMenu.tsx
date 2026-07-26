@@ -16,7 +16,7 @@ import {
   Typography,
   Box,
 } from '@mui/material'
-import { Logout as LogoutIcon, AccountCircle } from '@mui/icons-material'
+import { Logout as LogoutIcon } from '@mui/icons-material'
 import { useState, useCallback } from 'react'
 import { useAuth } from '../../hooks/useAuth'
 

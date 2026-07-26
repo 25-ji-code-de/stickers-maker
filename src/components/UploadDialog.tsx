@@ -147,7 +147,7 @@ function UploadDialog({
 
     // 从 URL 中提取 UUID 路径（去除域名部分）
     // 例如：https://storage.nightcord.de5.net/uuid/file.png -> uuid/file.png
-    const uuidPath = uploadedUrl.replace(/^https?:\/\/[^\/]+\//, '')
+    const uuidPath = uploadedUrl.replace(/^https?:\/\/[^/]+\//, '')
 
     return {
       '直链': uploadedUrl,

@@ -173,7 +173,7 @@ export default function GallerySubmitDialog({
               ⚠️ 此作品尚未上传到服务器，无法提交到画廊
             </Typography>
             <Typography variant="caption" display="block" mt={0.5}>
-              请先在主界面点击"上传"按钮，上传成功后再提交
+              请先在主界面点击“上传”按钮，上传成功后再提交
             </Typography>
           </Alert>
         )}
