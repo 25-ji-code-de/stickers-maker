@@ -3,15 +3,28 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
+  "description": "SEKAI 贴纸生成器",
+  "license": "AGPL-3.0-only",
+  "author": "The 25-ji-code-de Team",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/25-ji-code-de/stickers-maker.git"
+  },
+  "homepage": "https://github.com/25-ji-code-de/stickers-maker#readme",
+  "bugs": {
+    "url": "https://github.com/25-ji-code-de/stickers-maker/issues"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint . --ext js,jsx,ts,tsx --report-unused-disable-directives",
     "type-check": "tsc --noEmit",
+    "test": "node --test \"test/*.test.mjs\"",
     "preview": "vite preview",
     "format": "prettier --write ."
   },
   "dependencies": {
+    "@25-ji-code-de/sekai-auth": "github:25-ji-code-de/sekai-auth#v0.1.2",
     "@emotion/react": "^11.11.3",
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.15.0",
