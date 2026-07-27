@@ -134,8 +134,10 @@ export default defineConfig({
             '@emotion/react',
             '@emotion/styled'
           ],
-          // 将 fast-average-color 和 axios 分离
-          'vendor': ['fast-average-color', 'axios'],
+          // fast-average-color 单独分块
+          // （这里原来还列着 axios，但全仓没有任何文件 import 它 ——
+          //   Rollup 只打包可达的模块，所以那个条目一直是空转的）
+          'vendor': ['fast-average-color'],
         },
       },
     },
