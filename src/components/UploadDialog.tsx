@@ -107,7 +107,7 @@ function UploadDialog({
             if (onUploadSuccess) {
               onUploadSuccess(url)
             }
-          } catch (e) {
+          } catch {
             setError('服务器响应格式错误')
             setUploading(false)
           }
@@ -165,7 +165,7 @@ function UploadDialog({
       await navigator.clipboard.writeText(text)
       setCopiedFormat(format)
       setTimeout(() => setCopiedFormat(''), 2000)
-    } catch (err) {
+    } catch {
       alert('复制失败')
     }
   }

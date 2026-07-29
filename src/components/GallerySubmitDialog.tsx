@@ -66,7 +66,7 @@ export default function GallerySubmitDialog({
     if (user && !author && open) {
       setAuthor(user.username)
     }
-  }, [user, open])
+  }, [user, author, open])
 
   const handleAddTag = () => {
     const trimmed = tagInput.trim()

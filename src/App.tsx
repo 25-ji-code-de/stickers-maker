@@ -80,7 +80,7 @@ function App() {
     (img: HTMLImageElement) => {
       colorScheme.updateColorsFromImage(img)
     },
-    [colorScheme.updateColorsFromImage]
+    [colorScheme]
   )
 
   const characterHook = useCharacter(fileInputRef, handleImageLoad)
