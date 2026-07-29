@@ -273,7 +273,7 @@ export default function HistoryPanel({
               loading="lazy"
               style={{
                 objectFit: 'contain',
-                backgroundColor: '#212121',
+                backgroundColor: 'rgb(var(--sekai-canvas))',
                 aspectRatio: '296/256',
                 width: '100%',
               }}
@@ -324,7 +324,7 @@ export default function HistoryPanel({
                     maxWidth: '100%',
                     border: '1px solid #444',
                     borderRadius: 4,
-                    backgroundColor: '#212121',
+                    backgroundColor: 'rgb(var(--sekai-canvas))',
                   }}
                 />
               </Box>

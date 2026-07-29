@@ -57,7 +57,7 @@ export default function GallerySubmitForm({
     if (user && !author) {
       setAuthor(user.username)
     }
-  }, [user])
+  }, [user, author])
 
   const handleAddTag = () => {
     const trimmed = tagInput.trim()
