@@ -29,7 +29,6 @@
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.15.0",
     "@mui/material": "^5.18.0",
-    "@sekai/design": "github:25-ji-code-de/sekai-design#v0.1.0",
     "fast-average-color": "^9.4.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"

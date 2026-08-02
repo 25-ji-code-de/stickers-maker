@@ -74,13 +74,14 @@ function App() {
 
   // Character hook needs a callback to update colors when image loads
   const colorScheme = useColorScheme(49) // Initial character
+  const updateColorsFromImage = colorScheme.updateColorsFromImage
 
   // Use useCallback to stabilize the onImageLoad callback
   const handleImageLoad = useCallback(
     (img: HTMLImageElement) => {
-      colorScheme.updateColorsFromImage(img)
+      updateColorsFromImage(img)
     },
-    [colorScheme]
+    [updateColorsFromImage]
   )
 
   const characterHook = useCharacter(fileInputRef, handleImageLoad)

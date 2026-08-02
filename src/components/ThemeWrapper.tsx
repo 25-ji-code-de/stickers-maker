@@ -5,11 +5,6 @@ import { ThemeProvider, createTheme } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 import { useMemo } from 'react'
 
-function colorChannels(color: string, fallback: string): string {
-  const channels = color.match(/[\d.]+/g)?.slice(0, 3)
-  return channels?.length === 3 ? channels.join(' ') : fallback
-}
-
 interface ThemeWrapperProps {
   dominantColor: string
   backgroundColor: string
@@ -17,8 +12,6 @@ interface ThemeWrapperProps {
 }
 
 export default function ThemeWrapper({ dominantColor, backgroundColor, children }: ThemeWrapperProps) {
-  const accentChannels = colorChannels(dominantColor, '228 194 200')
-  const canvasChannels = colorChannels(backgroundColor, '67 60 61')
   const theme = useMemo(
     () =>
       createTheme({
@@ -42,23 +35,13 @@ export default function ThemeWrapper({ dominantColor, backgroundColor, children 
           fontFamily: '"YurukaStd", "SSFangTangTi", -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif',
         },
         components: {
-          MuiCssBaseline: {
-            styleOverrides: {
-              ':root': {
-                '--sekai-canvas': canvasChannels,
-                '--sekai-surface-card': canvasChannels,
-                '--sekai-accent': accentChannels,
-                '--sekai-fg': accentChannels,
-              },
-            },
-          },
           MuiSlider: {
             styleOverrides: {
               thumb: {
-                color: 'rgb(var(--sekai-accent))',
+                color: dominantColor,
               },
               track: {
-                color: 'rgb(var(--sekai-accent))',
+                color: dominantColor,
               },
             },
           },
@@ -66,14 +49,14 @@ export default function ThemeWrapper({ dominantColor, backgroundColor, children 
             styleOverrides: {
               switchBase: {
                 '&.Mui-checked': {
-                  color: 'rgb(var(--sekai-accent))',
+                  color: dominantColor,
                 },
               },
             },
           },
         },
       }),
-    [accentChannels, backgroundColor, canvasChannels, dominantColor]
+    [dominantColor, backgroundColor]
   )
 
   return (

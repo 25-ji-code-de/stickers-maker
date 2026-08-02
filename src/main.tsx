@@ -3,7 +3,6 @@
 
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import '@sekai/design/tokens'
 import './index.css'
 import App from './App'
 import AuthCallback from './components/auth/AuthCallback'
