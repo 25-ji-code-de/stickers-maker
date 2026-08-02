@@ -21,7 +21,7 @@ const GALLERY_MANIFEST_PATH = '/public/gallery/manifest.json'
 export { getCharacterName } from './historyUtils'
 
 /**
- * Fetch gallery manifest from storage server
+ * Fetch the latest gallery manifest from the public R2 host.
  * @returns Promise resolving to the gallery manifest
  * @throws Error if fetch fails
  */
@@ -30,8 +30,11 @@ export async function fetchGalleryManifest(): Promise<GalleryManifest> {
   const timeoutId = setTimeout(() => controller.abort(), 10000) // 10s timeout
 
   try {
-    const response = await fetch(`${PUBLIC_MEDIA}${GALLERY_MANIFEST_PATH}`, {
+    const manifestUrl = new URL(GALLERY_MANIFEST_PATH, PUBLIC_MEDIA)
+    manifestUrl.searchParams.set('v', Date.now().toString())
+    const response = await fetch(manifestUrl, {
       signal: controller.signal,
+      cache: 'no-store',
     })
 
     if (!response.ok) {
