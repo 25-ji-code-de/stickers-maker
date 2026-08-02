@@ -13,6 +13,10 @@ import {
 } from '../types'
 import { isInTimeRange, getCharacterName } from './historyUtils'
 
+const STORAGE_API = 'https://storage.nightcord.de5.net'
+const PUBLIC_MEDIA = 'https://r2.nightcord.de5.net'
+const GALLERY_MANIFEST_PATH = '/public/gallery/manifest.json'
+
 // Re-export for convenience
 export { getCharacterName } from './historyUtils'
 
@@ -26,7 +30,7 @@ export async function fetchGalleryManifest(): Promise<GalleryManifest> {
   const timeoutId = setTimeout(() => controller.abort(), 10000) // 10s timeout
 
   try {
-    const response = await fetch('https://storage.nightcord.de5.net/public/gallery/manifest.json', {
+    const response = await fetch(`${PUBLIC_MEDIA}${GALLERY_MANIFEST_PATH}`, {
       signal: controller.signal,
     })
 
@@ -47,6 +51,36 @@ export async function fetchGalleryManifest(): Promise<GalleryManifest> {
   } finally {
     clearTimeout(timeoutId)
   }
+}
+
+export async function uploadGalleryManifest(manifest: GalleryManifest): Promise<void> {
+  const file = new Blob([JSON.stringify(manifest, null, 2)], { type: 'application/json' })
+  const initResponse = await fetch(`${STORAGE_API}/v2/upload/gallery/init`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ size: file.size }),
+  })
+  if (!initResponse.ok) throw new Error('Failed to initialize gallery upload')
+
+  const init: unknown = await initResponse.json()
+  if (!init || typeof init !== 'object' || !('upload' in init)) {
+    throw new Error('Invalid gallery upload response')
+  }
+  const upload = init.upload
+  if (!upload || typeof upload !== 'object' || !('url' in upload) || !('fields' in upload)) {
+    throw new Error('Invalid gallery upload response')
+  }
+  if (typeof upload.url !== 'string' || !upload.fields || typeof upload.fields !== 'object') {
+    throw new Error('Invalid gallery upload response')
+  }
+
+  const form = new FormData()
+  for (const [name, value] of Object.entries(upload.fields)) {
+    form.append(name, String(value))
+  }
+  form.append('file', file, 'manifest.json')
+  const uploadResponse = await fetch(upload.url, { method: 'POST', body: form })
+  if (!uploadResponse.ok) throw new Error('Failed to upload gallery manifest')
 }
 
 /**

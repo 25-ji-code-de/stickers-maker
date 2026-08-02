@@ -19,6 +19,7 @@ import { useState, useEffect } from 'react'
 import { GalleryItem, GalleryManifest } from '../types'
 import charactersData from '../characters.json'
 import { useAuth } from '../hooks/useAuth'
+import { fetchGalleryManifest, uploadGalleryManifest } from '../utils/galleryUtils'
 
 interface GallerySubmitFormProps {
   uploadedUrl: string
@@ -90,11 +91,7 @@ export default function GallerySubmitForm({
 
     try {
       // 1. Fetch current manifest
-      const response = await fetch('https://storage.nightcord.de5.net/public/gallery/manifest.json')
-      if (!response.ok) {
-        throw new Error('Failed to fetch gallery')
-      }
-      const manifest: GalleryManifest = await response.json()
+      const manifest: GalleryManifest = await fetchGalleryManifest()
 
       // 2. Create new gallery item
       const newItem: GalleryItem = {
@@ -116,19 +113,7 @@ export default function GallerySubmitForm({
       }
 
       // 4. Upload updated manifest
-      const uploadResponse = await fetch('https://storage.nightcord.de5.net/', {
-        method: 'PUT',
-        headers: {
-          'X-Safe-Path': 'public/gallery',
-          'X-Filename': 'manifest.json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updatedManifest, null, 2),
-      })
-
-      if (!uploadResponse.ok) {
-        throw new Error('Failed to upload to gallery')
-      }
+      await uploadGalleryManifest(updatedManifest)
 
       setSuccess(true)
       if (onSuccess) {

@@ -19,6 +19,7 @@ import { Close, ContentCopy, CloudUpload } from '@mui/icons-material'
 import { useState, useEffect } from 'react'
 import GallerySubmitForm from './GallerySubmitForm'
 import { cropCanvasToContent } from '../utils/cropCanvas'
+import { uploadStorageV2Direct } from '../utils/storageUpload'
 
 interface UploadDialogProps {
   open: boolean
@@ -86,52 +87,14 @@ function UploadDialog({
       const timestamp = Date.now()
       const filename = `sekai_sticker_${timestamp}.png`
 
-      // 使用 XMLHttpRequest 上传以支持进度
-      const xhr = new XMLHttpRequest()
-
-      xhr.upload.addEventListener('progress', (e) => {
-        if (e.lengthComputable) {
-          const percent = Math.round((e.loaded / e.total) * 100)
-          setUploadProgress(percent)
-        }
+      const result = await uploadStorageV2Direct(blob, filename, {
+        kind: 'sticker',
+        contentType: 'image/png',
+        onProgress: setUploadProgress,
       })
-
-      xhr.addEventListener('load', () => {
-        if (xhr.status >= 200 && xhr.status < 300) {
-          try {
-            const result = JSON.parse(xhr.responseText)
-            const url = `https://storage.nightcord.de5.net/${result.key}`
-            setUploadedUrl(url)
-            setUploading(false)
-            // Call the success callback
-            if (onUploadSuccess) {
-              onUploadSuccess(url)
-            }
-          } catch {
-            setError('服务器响应格式错误')
-            setUploading(false)
-          }
-        } else {
-          setError(`上传失败: ${xhr.status}`)
-          setUploading(false)
-        }
-      })
-
-      xhr.addEventListener('error', () => {
-        setError('网络错误')
-        setUploading(false)
-      })
-
-      xhr.addEventListener('timeout', () => {
-        setError('上传超时')
-        setUploading(false)
-      })
-
-      xhr.timeout = 30000
-      xhr.open('PUT', 'https://storage.nightcord.de5.net')
-      xhr.setRequestHeader('X-Filename', encodeURIComponent(filename))
-      xhr.setRequestHeader('Content-Type', 'image/png')
-      xhr.send(blob as XMLHttpRequestBodyInit)
+      setUploadedUrl(result.url)
+      setUploading(false)
+      onUploadSuccess?.(result.url)
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : '上传失败'
       setError(errorMessage)
@@ -146,7 +109,7 @@ function UploadDialog({
     const displayText = altText.split('\n')[0].substring(0, 50) || 'Sekai Sticker'
 
     // 从 URL 中提取 UUID 路径（去除域名部分）
-    // 例如：https://storage.nightcord.de5.net/uuid/file.png -> uuid/file.png
+    // 例如：https://r2.nightcord.de5.net/uuid/file.png -> uuid/file.png
     const uuidPath = uploadedUrl.replace(/^https?:\/\/[^/]+\//, '')
 
     return {
