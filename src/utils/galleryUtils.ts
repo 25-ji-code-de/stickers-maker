@@ -17,6 +17,12 @@ const STORAGE_API = 'https://storage.nightcord.de5.net'
 const PUBLIC_MEDIA = 'https://r2.nightcord.de5.net'
 const GALLERY_MANIFEST_PATH = '/public/gallery/manifest.json'
 
+function normalizeGalleryItemUrl(url: string): string {
+  const legacyStoragePrefix = `${STORAGE_API}/`
+  if (!url.startsWith(legacyStoragePrefix)) return url
+  return `${PUBLIC_MEDIA}/${url.slice(legacyStoragePrefix.length)}`
+}
+
 // Re-export for convenience
 export { getCharacterName } from './historyUtils'
 
@@ -42,7 +48,13 @@ export async function fetchGalleryManifest(): Promise<GalleryManifest> {
     }
 
     const manifest: GalleryManifest = await response.json()
-    return manifest
+    return {
+      ...manifest,
+      items: manifest.items.map(item => ({
+        ...item,
+        url: normalizeGalleryItemUrl(item.url),
+      })),
+    }
   } catch (error) {
     if (error instanceof Error) {
       if (error.name === 'AbortError') {
