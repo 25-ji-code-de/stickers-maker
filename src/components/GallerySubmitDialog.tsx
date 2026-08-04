@@ -7,23 +7,15 @@ import {
   DialogContent,
   DialogActions,
   Button,
-  TextField,
-  Box,
   Typography,
-  Chip,
   Alert,
   CircularProgress,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  SelectChangeEvent,
 } from '@mui/material'
 import { useState, useEffect } from 'react'
 import { HistoryItem, GalleryItem, GalleryManifest } from '../types'
-import charactersData from '../characters.json'
 import { useAuth } from '../hooks/useAuth'
 import { fetchGalleryManifest, uploadGalleryManifest } from '../utils/galleryUtils'
+import GallerySubmitFields from './GallerySubmitFields'
 
 interface GallerySubmitDialogProps {
   open: boolean
@@ -41,7 +33,6 @@ export default function GallerySubmitDialog({
   const [author, setAuthor] = useState('')
   const [description, setDescription] = useState('')
   const [tags, setTags] = useState<string[]>([])
-  const [tagInput, setTagInput] = useState('')
   const [characterId, setCharacterId] = useState<number | ''>('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -68,23 +59,6 @@ export default function GallerySubmitDialog({
       setAuthor(user.username)
     }
   }, [user, author, open])
-
-  const handleAddTag = () => {
-    const trimmed = tagInput.trim()
-    if (trimmed && !tags.includes(trimmed)) {
-      setTags([...tags, trimmed])
-      setTagInput('')
-    }
-  }
-
-  const handleRemoveTag = (tagToRemove: string) => {
-    setTags(tags.filter(t => t !== tagToRemove))
-  }
-
-  const handleCharacterChange = (e: SelectChangeEvent<number | ''>) => {
-    const value = e.target.value
-    setCharacterId(value === '' ? '' : Number(value))
-  }
 
   const handleSubmit = async () => {
     if (!historyItem || !historyItem.uploadedUrl) {
@@ -183,87 +157,21 @@ export default function GallerySubmitDialog({
           </Alert>
         )}
 
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
-          <TextField
-            label="作品标题（可选）"
-            placeholder={historyItem?.config.text || "留空则使用文本内容"}
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            fullWidth
-            disabled={submitting}
-            helperText="留空则自动使用贴纸文本内容"
-          />
-
-          <TextField
-            label="作者名称"
-            placeholder="你的昵称（可留空）"
-            value={author}
-            onChange={(e) => setAuthor(e.target.value)}
-            fullWidth
-            disabled={submitting}
-          />
-
-          <FormControl fullWidth disabled={submitting}>
-            <InputLabel>角色</InputLabel>
-            <Select
-              value={characterId}
-              label="角色"
-              onChange={handleCharacterChange}
-            >
-              <MenuItem value="">不指定角色</MenuItem>
-              {charactersData.map((char, idx) => (
-                <MenuItem key={idx} value={idx}>
-                  {char.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          <Box>
-            <TextField
-              label="标签"
-              placeholder="输入标签后按回车添加"
-              value={tagInput}
-              onChange={(e) => setTagInput(e.target.value)}
-              onKeyPress={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault()
-                  handleAddTag()
-                }
-              }}
-              fullWidth
-              disabled={submitting}
-              helperText="建议添加 2-5 个标签，帮助他人找到你的作品"
-            />
-            <Box display="flex" gap={1} flexWrap="wrap" mt={1}>
-              {tags.map((tag) => (
-                <Chip
-                  key={tag}
-                  label={tag}
-                  onDelete={() => handleRemoveTag(tag)}
-                  size="small"
-                  disabled={submitting}
-                  color="primary"
-                  variant="outlined"
-                />
-              ))}
-            </Box>
-            <Typography variant="caption" color="text.secondary" display="block" mt={0.5}>
-              💡 例如：可爱、表情、搞笑、节日、创意等
-            </Typography>
-          </Box>
-
-          <TextField
-            label="作品描述"
-            placeholder="简单介绍一下这个作品的灵感或用途"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            multiline
-            rows={3}
-            fullWidth
-            disabled={submitting}
-          />
-        </Box>
+        <GallerySubmitFields
+          title={title}
+          titlePlaceholder={historyItem?.config.text || '留空则使用文本内容'}
+          onTitleChange={setTitle}
+          author={author}
+          onAuthorChange={setAuthor}
+          characterId={characterId}
+          onCharacterIdChange={setCharacterId}
+          tags={tags}
+          onTagsChange={setTags}
+          description={description}
+          onDescriptionChange={setDescription}
+          disabled={submitting}
+          marginTop={1}
+        />
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose} disabled={submitting}>
